@@ -122,7 +122,7 @@ class StrObj
 
     public function str_replace()
     {
-        return new self(call_user_func_array('str_ireplace', array_splice(func_get_args(), 2, 0, $this->data)));
+        return new self(call_user_func_array('str_replace', array_splice(func_get_args(), 2, 0, $this->data)));
     }
 
     public function strtok($delim)
