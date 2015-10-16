@@ -69,7 +69,6 @@ class StrObj
         'compareSub' => 'substr_compare',
         'countSub' => 'substr_count',
         'replace' => 'substr_replace',
-        'sub' => 'substr',
     ];
 
     public function __construct($data)
