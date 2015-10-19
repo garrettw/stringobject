@@ -1,7 +1,18 @@
-languages:
-  Ruby: false
-  JavaScript: false
-  PHP: true
-  Python: false
+engines:
+  phpmd:
+    enabled: true
+    checks:
+      Design/TooManyMethods:
+        enabled: false
+  phpcodesniffer:
+    enabled: true
+    checks:
+      PSR1 Methods CamelCapsMethodName NotCamelCaps:
+        enabled: false
+ratings:
+  paths:
+  - "**.php"
+  - "**.module"
+  - "**.inc"
 exclude_paths:
 - spec/*
