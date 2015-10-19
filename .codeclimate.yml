@@ -2,6 +2,8 @@ engines:
   phpmd:
     enabled: true
     checks:
+      Controversial/CamelCaseMethodName:
+        enabled: false
       Design/TooManyMethods:
         enabled: false
   phpcodesniffer:
