@@ -4,7 +4,7 @@ namespace StrObj;
 
 class String
 {
-    private $data;
+    private $raw;
     private $token = false;
     private static $stdFuncs = [
         'addcslashes', 'addslashes', 'bin2hex', 'chop', 'chunk_split',
@@ -25,7 +25,7 @@ class String
     ];
     private static $apiMap = [ // 'new' => 'old'
         'chunkSplit' => 'chunk_split',
-        'convertCyrString' => 'convert_cyr_string',
+        'convertCyrillic' => 'convert_cyr_string',
         'uudecode' => 'convert_uudecode',
         'uuencode' => 'convert_uuencode',
         'htmlEntityDecode' => 'html_entity_decode',
@@ -73,14 +73,14 @@ class String
         'replace' => 'substr_replace',
     ];
 
-    public function __construct($data)
+    public function __construct($raw)
     {
-        $this->data = $data;
+        $this->raw = $raw;
     }
 
     public function __toString()
     {
-        return $this->data;
+        return $this->raw;
     }
 
     public function __get($name)
@@ -98,7 +98,7 @@ class String
             return;
         }
 
-        array_unshift($args, $this->data);
+        array_unshift($args, $this->raw);
         $val = call_user_func_array($method, $args);
 
         if (is_string($val)) {
@@ -114,7 +114,7 @@ class String
 
     public function count_chars($mode = 0)
     {
-        $result = call_user_func('count_chars', $this->data, $mode);
+        $result = call_user_func('count_chars', $this->raw, $mode);
 
         if ($mode >= 3) {
             return new self($result);
@@ -149,7 +149,7 @@ class String
     public function tokenize($delim)
     {
         $this->token = true;
-        return new self(strtok($this->data, $delim));
+        return new self(strtok($this->raw, $delim));
     }
 
     public function resetToken()
@@ -159,6 +159,6 @@ class String
 
     private function callWithAltArgPos($func, $args, $pos)
     {
-        return call_user_func_array($func, array_splice($args, $pos, 0, $this->data));
+        return call_user_func_array($func, array_splice($args, $pos, 0, $this->raw));
     }
 }
