@@ -1,0 +1,28 @@
+{
+	"name": "garrettw/stringobject",
+	"description": "PHP class that wraps most if not all of the string manipulation functions, so that you can work with strings as objects",
+	"keywords": ["string","manipulation","wrapper"],
+	"type": "library",
+	"homepage": "https://github.com/garrettw/stringobject",
+	"license": "ISC",
+	"authors": [
+		{
+			"name": "Garrett Whitehorn",
+			"homepage": "http://garrettw.net/",
+			"role": "Lead Developer"
+		}
+	],
+	"require": {
+		"php": ">=5.4.0"
+	},
+	"require-dev": {
+		"phpdocumentor/phpdocumentor": "~2.8",
+		"phpspec/phpspec": "~2.1",
+        "fabpot/php-cs-fixer": "~1.8"
+	},
+	"autoload": {
+		"psr-4": {
+			"StrObj\\": "src/"
+		}
+	}
+}

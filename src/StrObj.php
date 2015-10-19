@@ -1,6 +1,8 @@
 <?php
 
-class StrObj
+namespace StrObj;
+
+class String
 {
     private $data;
     private $token = false;
@@ -53,9 +55,9 @@ class StrObj
         'compareNatural' => 'strnatcmp',
         'icompareFirstN' => 'strncasecmp',
         'compareFirstN' => 'strncmp',
-        'subStartFromCharList' => 'strpbrk',
+        'substrStartFromCharList' => 'strpbrk',
         'indexOf' => 'strpos',
-        'subStartFromLastChar' => 'strrchr',
+        'substrStartFromLastChar' => 'strrchr',
         'reverse' => 'strrev',
         'iindexOfLast' => 'strripos',
         'indexOfLast' => 'strrpos',
@@ -66,8 +68,8 @@ class StrObj
         'nextToken' => 'strtok',
         'toUpper' => 'strtoupper',
         'translate' => 'strtr',
-        'compareSub' => 'substr_compare',
-        'countSub' => 'substr_count',
+        'compareSubs' => 'substr_compare',
+        'countSubs' => 'substr_count',
         'replace' => 'substr_replace',
     ];
 
@@ -105,28 +107,35 @@ class StrObj
         return $val;
     }
 
+    public function __invoke($str)
+    {
+        return new self($str);
+    }
+
     public function count_chars($mode = 0)
     {
+        $result = call_user_func('count_chars', $this->data, $mode);
+
         if ($mode >= 3) {
-            return new self(call_user_func('count_chars', $this->data, $mode));
+            return new self($result);
         }
 
-        return call_user_func('count_chars', $this->data, $mode);
+        return $result;
     }
 
     public function explode()
     {
-        return call_user_func_array('explode', array_splice(func_get_args(), 1, 0, $this->data));
+        return $this->callWithAltArgPos('explode', func_get_args(), 1);
     }
 
     public function str_ireplace()
     {
-        return new self(call_user_func_array('str_ireplace', array_splice(func_get_args(), 2, 0, $this->data)));
+        return new self($this->callWithAltArgPos('str_ireplace', func_get_args(), 2));
     }
 
     public function str_replace()
     {
-        return new self(call_user_func_array('str_replace', array_splice(func_get_args(), 2, 0, $this->data)));
+        return new self($this->callWithAltArgPos('str_replace', func_get_args(), 2));
     }
 
     public function strtok($delim)
@@ -146,5 +155,10 @@ class StrObj
     public function resetToken()
     {
         $this->token = false;
+    }
+
+    private function callWithAltArgPos($func, $args, $pos)
+    {
+        return call_user_func_array($func, array_splice($args, $pos, 0, $this->data));
     }
 }
