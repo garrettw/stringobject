@@ -1,8 +1,8 @@
 <?php
 
-namespace StrObj;
+namespace StringObject;
 
-class String
+class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
 {
     private $raw;
     private $token = false;
@@ -64,16 +64,16 @@ class String
         'lengthOfMasked' => 'strspn',
         'subStartFromString' => 'strstr',
         'token' => 'strtok',
-        'toLower' => 'strtolower',
+        'toLowerCase' => 'strtolower',
         'nextToken' => 'strtok',
-        'toUpper' => 'strtoupper',
+        'toUpperCase' => 'strtoupper',
         'translate' => 'strtr',
         'compareSubs' => 'substr_compare',
         'countSubs' => 'substr_count',
         'replace' => 'substr_replace',
     ];
 
-    public function __construct($raw)
+    public function __construct($raw = '')
     {
         $this->raw = $raw;
     }
@@ -90,31 +90,36 @@ class String
 
     public function __call($method, $args)
     {
-        if (array_key_exists($method, self::$apiMap)) {
-            return call_user_func_array(array($this, self::$apiMap[$method]), $args);
+        if (\array_key_exists($method, self::$apiMap)) {
+            return \call_user_func_array(array($this, self::$apiMap[$method]), $args);
         }
 
-        if (!in_array($method, self::$stdFuncs)) {
+        if (!\in_array($method, self::$stdFuncs)) {
             return;
         }
 
-        array_unshift($args, $this->raw);
-        $val = call_user_func_array($method, $args);
+        \array_unshift($args, $this->raw);
+        $val = \call_user_func_array($method, $args);
 
-        if (is_string($val)) {
+        if (\is_string($val)) {
             return new self($val);
         }
         return $val;
     }
 
-    public function __invoke($str)
+    public function __invoke($str = '')
+    {
+        return new self($str);
+    }
+
+    public static function make($str = '')
     {
         return new self($str);
     }
 
     public function count_chars($mode = 0)
     {
-        $result = call_user_func('count_chars', $this->raw, $mode);
+        $result = \count_chars($this->raw, $mode);
 
         if ($mode >= 3) {
             return new self($result);
@@ -125,23 +130,23 @@ class String
 
     public function explode()
     {
-        return $this->callWithAltArgPos('explode', func_get_args(), 1);
+        return $this->callWithAltArgPos('explode', \func_get_args(), 1);
     }
 
     public function str_ireplace()
     {
-        return new self($this->callWithAltArgPos('str_ireplace', func_get_args(), 2));
+        return new self($this->callWithAltArgPos('str_ireplace', \func_get_args(), 2));
     }
 
     public function str_replace()
     {
-        return new self($this->callWithAltArgPos('str_replace', func_get_args(), 2));
+        return new self($this->callWithAltArgPos('str_replace', \func_get_args(), 2));
     }
 
     public function strtok($delim)
     {
         if ($this->token) {
-            return new self(strtok($delim));
+            return new self(\strtok($delim));
         }
         return $this->tokenize($delim);
     }
@@ -149,7 +154,7 @@ class String
     public function tokenize($delim)
     {
         $this->token = true;
-        return new self(strtok($this->raw, $delim));
+        return new self(\strtok($this->raw, $delim));
     }
 
     public function resetToken()
@@ -157,8 +162,52 @@ class String
         $this->token = false;
     }
 
+    public function append($str)
+    {
+        $this->raw .= $str;
+        return $this;
+    }
+
+    public function prepend($str)
+    {
+        $this->raw = $str . $this->raw;
+        return $this;
+    }
+
+
+    public function count()
+    {
+        return \strlen($this->raw);
+    }
+
+    public function getIterator()
+    {
+        return new \ArrayIterator(\str_split($this->raw));
+    }
+
+    public function offsetExists($offset)
+    {
+        $offset = (int) $offset;
+        return ($offset >= 0 && $offset < \strlen($this->raw));
+    }
+
+    public function offsetGet($offset)
+    {
+        return $this->raw{$offset};
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        $this->raw{$offset} = $value;
+    }
+
+    public function offsetUnset($offset)
+    {
+        $this->raw{$offset} = null;
+    }
+
     private function callWithAltArgPos($func, $args, $pos)
     {
-        return call_user_func_array($func, array_splice($args, $pos, 0, $this->raw));
+        return \call_user_func_array($func, \array_splice($args, $pos, 0, $this->raw));
     }
 }

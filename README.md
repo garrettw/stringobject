@@ -4,3 +4,6 @@
 [![Build Status](https://travis-ci.org/garrettw/StringObject.svg?branch=master)](https://travis-ci.org/garrettw/StringObject) [![Code Climate](https://codeclimate.com/github/garrettw/stringobject/badges/gpa.svg)](https://codeclimate.com/github/garrettw/stringobject) [![SensioLabsInsight](https://img.shields.io/sensiolabs/i/db648e49-917a-46a6-86e9-714a495a4d85.svg)](https://insight.sensiolabs.com/projects/db648e49-917a-46a6-86e9-714a495a4d85) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/garrettw/stringobject/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/garrettw/stringobject/?branch=master)
 
 I know it's been done, but I just wanted to make my own OO string lib for PHP.
+
+Usage
+----

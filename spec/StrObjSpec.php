@@ -1,11 +1,11 @@
 <?php
 
-namespace spec\StrObj;
+namespace spec\StringObject;
 
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
-class StringSpec extends ObjectBehavior
+class StrObjSpec extends ObjectBehavior
 {
     function it_is_initializable()
     {
