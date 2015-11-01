@@ -42,34 +42,36 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
         'rot13' => 'str_rot13',
         'shuffle' => 'str_shuffle',
         'split' => 'str_split',
+        'toArray' => 'str_split',
         'countWords' => 'str_word_count',
         'icompare' => 'strcasecmp',
         'compare' => 'strcmp',
         'compareLocale' => 'strcoll',
-        'lengthBeforeMask' => 'strcspn',
+        'lengthBeforeCharMask' => 'strcspn',
         'stripTags' => 'strip_tags',
         'iindexOf' => 'stripos',
-        'isubStartFromString' => 'stristr',
+        'isubstrFromCharToEnd' => 'stristr',
+        'isubstrFromStringToEnd' => 'stristr',
         'length' => 'strlen',
         'icompareNatural' => 'strnatcasecmp',
         'compareNatural' => 'strnatcmp',
         'icompareFirstN' => 'strncasecmp',
         'compareFirstN' => 'strncmp',
-        'substrStartFromCharList' => 'strpbrk',
+        'substrFromCharListToEnd' => 'strpbrk',
         'indexOf' => 'strpos',
-        'substrStartFromLastChar' => 'strrchr',
+        'substrFromLastCharToEnd' => 'strrchr',
         'reverse' => 'strrev',
         'iindexOfLast' => 'strripos',
         'indexOfLast' => 'strrpos',
         'lengthOfMasked' => 'strspn',
-        'subStartFromString' => 'strstr',
-        'token' => 'strtok',
+        'substrFromStringToEnd' => 'strstr',
         'toLowerCase' => 'strtolower',
+        'token' => 'strtok',
         'nextToken' => 'strtok',
         'toUpperCase' => 'strtoupper',
         'translate' => 'strtr',
-        'compareSubs' => 'substr_compare',
-        'countSubs' => 'substr_count',
+        'compareSubstr' => 'substr_compare',
+        'countSubstr' => 'substr_count',
         'replace' => 'substr_replace',
     ];
 
@@ -115,6 +117,11 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
     public static function make($str = '')
     {
         return new self($str);
+    }
+
+    public function charAt($i)
+    {
+        return $this->raw{$i};
     }
 
     public function count_chars($mode = 0)
