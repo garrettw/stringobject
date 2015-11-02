@@ -32,6 +32,7 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
         'htmlEntityEncode' => 'htmlentities',
         'htmlSpecialCharsDecode' => 'htmlspecialchars_decode',
         'htmlSpecialCharsEncode' => 'htmlspecialchars',
+        'firstCharToLowerCase' => 'lcfirst',
         'quotedPrintableDecode' => 'quoted_printable_decode',
         'quotedPrintableEncode' => 'quoted_printable_encode',
         'similarText' => 'similar_text',
@@ -73,6 +74,7 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
         'compareSubstr' => 'substr_compare',
         'countSubstr' => 'substr_count',
         'replace' => 'substr_replace',
+        'firstCharToUpperCase' => 'ucfirst',
     ];
 
     public function __construct($raw = '')
@@ -205,12 +207,12 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
 
     public function offsetSet($offset, $value)
     {
-        $this->raw{$offset} = $value;
+        // throw exception
     }
 
     public function offsetUnset($offset)
     {
-        $this->raw{$offset} = null;
+        // throw exception
     }
 
     private function callWithAltArgPos($func, $args, $pos)
