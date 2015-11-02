@@ -10,7 +10,7 @@ class StrObjSpec extends ObjectBehavior
     function it_is_initializable()
     {
         $this->beConstructedWith('string of text');
-        $this->shouldHaveType('StringObject\String');
+        $this->shouldHaveType('StringObject\StrObj');
     }
 
     function it_can_addcslashes()
