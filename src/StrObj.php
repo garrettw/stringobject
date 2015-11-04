@@ -4,9 +4,12 @@ namespace StringObject;
 
 class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
 {
-    private $raw;
-    private $token = false;
-    private static $stdFuncs = [
+    const CASE_SENSITIVE = 0;
+    const CASE_INSENSITIVE = 1;
+
+    protected $raw;
+    protected $token = false;
+    protected static $stdFuncs = [
         'addcslashes', 'addslashes', 'bin2hex', 'chop', 'chunk_split',
         'convert_cyr_string', 'convert_uudecode', 'convert_uuencode', 'crc32',
         'crypt', 'empty', 'hebrev', 'hebrevc', 'hex2bin', 'html_entity_decode',
@@ -23,7 +26,7 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
         'substr_compare', 'substr_count', 'substr_replace', 'substr', 'trim',
         'ucfirst', 'ucwords', 'wordwrap',
     ];
-    private static $apiMap = [ // 'new' => 'old'
+    protected static $apiMap = [ // 'new' => 'old'
         'chunkSplit' => 'chunk_split',
         'convertCyrillic' => 'convert_cyr_string',
         'uudecode' => 'convert_uudecode',
@@ -67,7 +70,7 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
         'lengthOfMasked' => 'strspn',
         'substrFromStringToEnd' => 'strstr',
         'toLowerCase' => 'strtolower',
-        'token' => 'strtok',
+        'tokenize' => 'strtok',
         'nextToken' => 'strtok',
         'toUpperCase' => 'strtoupper',
         'translate' => 'strtr',
@@ -95,7 +98,7 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
     public function __call($method, $args)
     {
         if (\array_key_exists($method, self::$apiMap)) {
-            return \call_user_func_array(array($this, self::$apiMap[$method]), $args);
+            return $this->getSelfIfString(\call_user_func_array([$this, self::$apiMap[$method]], $args));
         }
 
         if (!\in_array($method, self::$stdFuncs)) {
@@ -103,12 +106,7 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
         }
 
         \array_unshift($args, $this->raw);
-        $val = \call_user_func_array($method, $args);
-
-        if (\is_string($val)) {
-            return new self($val);
-        }
-        return $val;
+        return $this->getSelfIfString(\call_user_func_array($method, $args));
     }
 
     public function __invoke($str = '')
@@ -157,13 +155,13 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
         if ($this->token) {
             return new self(\strtok($delim));
         }
-        return $this->tokenize($delim);
-    }
-
-    public function tokenize($delim)
-    {
         $this->token = true;
         return new self(\strtok($this->raw, $delim));
+    }
+
+    public function eachToken($delim)
+    {
+        return new StrObjTokenized($this, $delim);
     }
 
     public function resetToken()
@@ -173,16 +171,13 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
 
     public function append($str)
     {
-        $this->raw .= $str;
-        return $this;
+        return new self($this->raw . $str);
     }
 
     public function prepend($str)
     {
-        $this->raw = $str . $this->raw;
-        return $this;
+        return new self($str . $this->raw);
     }
-
 
     public function count()
     {
@@ -207,16 +202,24 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
 
     public function offsetSet($offset, $value)
     {
-        // throw exception
+        throw new \LogicException('Invalid assignment operation on immutable StrObj instance');
     }
 
     public function offsetUnset($offset)
     {
-        // throw exception
+        throw new \LogicException('Invalid unset operation on immutable StrObj instance');
     }
 
-    private function callWithAltArgPos($func, $args, $pos)
+    protected function callWithAltArgPos($func, $args, $pos)
     {
         return \call_user_func_array($func, \array_splice($args, $pos, 0, $this->raw));
+    }
+
+    protected function getSelfIfString($val)
+    {
+        if (\is_string($val)) {
+            return new self($val);
+        }
+        return $val;
     }
 }
