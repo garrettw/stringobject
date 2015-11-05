@@ -15,8 +15,8 @@ class IteratorFactory
 
     public function makeFor(StrObj $so)
     {
-        if ($type == 'token') {
-            return new TokenIterator($so, $delim);
+        if ($this->type == 'token') {
+            return new TokenIterator($so, $this->delim);
         }
         return new CharIterator($so);
     }

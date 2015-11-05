@@ -9,6 +9,7 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
 
     private $raw;
     private $token = false;
+    private $factory;
     private $iterator;
     private static $stdFuncs = [
         'addcslashes', 'addslashes', 'bin2hex', 'chop', 'chunk_split',
@@ -81,9 +82,10 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
         'firstCharToUpperCase' => 'ucfirst',
     ];
 
-    public function __construct($raw = '', IteratorFactory $ifac)
+    public function __construct($raw, IteratorFactory $ifac)
     {
         $this->raw = $raw;
+        $this->factory = $ifac;
         $this->iterator = $ifac->makeFor($this);
     }
 
@@ -112,30 +114,14 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
         return $this->getSelfIfString(\call_user_func_array($method, $args));
     }
 
-    public function __invoke($str = '')
+    public static function make($str, IteratorFactory $ifac)
     {
-        return new self($str);
-    }
-
-    public static function make($str = '')
-    {
-        return new self($str);
+        return new self($str, $ifac);
     }
 
     public function charAt($i)
     {
         return $this->raw{$i};
-    }
-
-    public function count_chars($mode = 0)
-    {
-        $result = \count_chars($this->raw, $mode);
-
-        if ($mode >= 3) {
-            return new self($result);
-        }
-
-        return $result;
     }
 
     public function explode()
@@ -145,21 +131,21 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
 
     public function str_ireplace()
     {
-        return new self($this->callWithAltArgPos('str_ireplace', \func_get_args(), 2));
+        return new self($this->callWithAltArgPos('str_ireplace', \func_get_args(), 2), $this->factory);
     }
 
     public function str_replace()
     {
-        return new self($this->callWithAltArgPos('str_replace', \func_get_args(), 2));
+        return new self($this->callWithAltArgPos('str_replace', \func_get_args(), 2), $this->factory);
     }
 
     public function strtok($delim)
     {
         if ($this->token) {
-            return new self(\strtok($delim));
+            return new self(\strtok($delim), $this->factory);
         }
         $this->token = true;
-        return new self(\strtok($this->raw, $delim));
+        return new self(\strtok($this->raw, $delim), $this->factory);
     }
 
     public function resetToken()
@@ -169,12 +155,12 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
 
     public function append($str)
     {
-        return new self($this->raw . $str);
+        return new self($this->raw . $str, $this->factory);
     }
 
     public function prepend($str)
     {
-        return new self($str . $this->raw);
+        return new self($str . $this->raw, $this->factory);
     }
 
     public function count()
@@ -216,7 +202,7 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
     private function getSelfIfString($val)
     {
         if (\is_string($val)) {
-            return new self($val);
+            return new self($val, $this->factory);
         }
         return $val;
     }

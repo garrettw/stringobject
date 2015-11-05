@@ -7,7 +7,7 @@ class TokenIterator implements \Iterator
     private $strobj;
     private $delim;
     private $index = 0;
-    private $curval = '';
+    private $curval;
 
     public function __construct(StrObj $so, $delim)
     {
