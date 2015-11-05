@@ -7,9 +7,10 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
     const CASE_SENSITIVE = 0;
     const CASE_INSENSITIVE = 1;
 
-    protected $raw;
-    protected $token = false;
-    protected static $stdFuncs = [
+    private $raw;
+    private $token = false;
+    private $iterator;
+    private static $stdFuncs = [
         'addcslashes', 'addslashes', 'bin2hex', 'chop', 'chunk_split',
         'convert_cyr_string', 'convert_uudecode', 'convert_uuencode', 'crc32',
         'crypt', 'empty', 'hebrev', 'hebrevc', 'hex2bin', 'html_entity_decode',
@@ -26,7 +27,7 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
         'substr_compare', 'substr_count', 'substr_replace', 'substr', 'trim',
         'ucfirst', 'ucwords', 'wordwrap',
     ];
-    protected static $apiMap = [ // 'new' => 'old'
+    private static $apiMap = [ // 'new' => 'old'
         'chunkSplit' => 'chunk_split',
         'convertCyrillic' => 'convert_cyr_string',
         'uudecode' => 'convert_uudecode',
@@ -80,9 +81,10 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
         'firstCharToUpperCase' => 'ucfirst',
     ];
 
-    public function __construct($raw = '')
+    public function __construct($raw = '', IteratorFactory $ifac)
     {
         $this->raw = $raw;
+        $this->iterator = $ifac->makeFor($this);
     }
 
     public function __toString()
@@ -98,7 +100,8 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
     public function __call($method, $args)
     {
         if (\array_key_exists($method, self::$apiMap)) {
-            return $this->getSelfIfString(\call_user_func_array([$this, self::$apiMap[$method]], $args));
+            $result = \call_user_func_array([$this, self::$apiMap[$method]], $args);
+            return $this->getSelfIfString($result);
         }
 
         if (!\in_array($method, self::$stdFuncs)) {
@@ -159,11 +162,6 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
         return new self(\strtok($this->raw, $delim));
     }
 
-    public function eachToken($delim)
-    {
-        return new StrObjTokenized($this, $delim);
-    }
-
     public function resetToken()
     {
         $this->token = false;
@@ -186,7 +184,7 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
 
     public function getIterator()
     {
-        return new \ArrayIterator(\str_split($this->raw));
+        return $this->iterator;
     }
 
     public function offsetExists($offset)
@@ -210,12 +208,12 @@ class StrObj implements \ArrayAccess, \Countable, \IteratorAggregate
         throw new \LogicException('Invalid unset operation on immutable StrObj instance');
     }
 
-    protected function callWithAltArgPos($func, $args, $pos)
+    private function callWithAltArgPos($func, $args, $pos)
     {
         return \call_user_func_array($func, \array_splice($args, $pos, 0, $this->raw));
     }
 
-    protected function getSelfIfString($val)
+    private function getSelfIfString($val)
     {
         if (\is_string($val)) {
             return new self($val);
