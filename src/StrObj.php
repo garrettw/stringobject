@@ -13,7 +13,7 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
     private static $stdFuncs = [
         'addcslashes', 'addslashes', 'bin2hex', 'chop', 'chunk_split',
         'convert_cyr_string', 'convert_uudecode', 'convert_uuencode', 'crc32',
-        'crypt', 'empty', 'hebrev', 'hebrevc', 'hex2bin', 'html_entity_decode',
+        'crypt', 'hebrev', 'hebrevc', 'hex2bin', 'html_entity_decode',
         'htmlentities', 'htmlspecialchars_decode', 'htmlspecialchars',
         'lcfirst', 'levenshtein', 'ltrim', 'md5', 'metaphone', 'nl2br', 'ord',
         'quoted_printable_decode', 'quoted_printable_encode', 'quotemeta',
@@ -44,12 +44,14 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         'getCSV' => 'str_getcsv',
         'pad' => 'str_pad',
         'repeat' => 'str_repeat',
+        'times' => 'str_repeat',
         'rot13' => 'str_rot13',
         'shuffle' => 'str_shuffle',
         'split' => 'str_split',
         'toArray' => 'str_split',
         'countWords' => 'str_word_count',
         'icompare' => 'strcasecmp',
+        'substrFromCharToEnd' => 'strchr',
         'compare' => 'strcmp',
         'compareLocale' => 'strcoll',
         'lengthBeforeCharMask' => 'strcspn',
@@ -79,6 +81,7 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         'countSubstr' => 'substr_count',
         'replace' => 'substr_replace',
         'firstCharToUpperCase' => 'ucfirst',
+        'wordsToUpperCase' => 'ucwords',
     ];
 
     public function __construct($raw)
@@ -104,7 +107,7 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         }
 
         if (!\in_array($method, self::$stdFuncs)) {
-            return;
+            throw new \BadMethodCallException("Method $method does not exist");
         }
 
         \array_unshift($args, $this->raw);
@@ -119,6 +122,11 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
     public function charAt($i)
     {
         return $this->raw{$i};
+    }
+
+    public function isEmpty()
+    {
+        return empty($this->raw);
     }
 
     public function explode()
@@ -213,7 +221,8 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
 
     private function callWithAltArgPos($func, $args, $pos)
     {
-        return \call_user_func_array($func, \array_splice($args, $pos, 0, $this->raw));
+        \array_splice($args, $pos, 0, $this->raw);
+        return \call_user_func_array($func, $args);
     }
 
     private function getSelfIfString($val)
