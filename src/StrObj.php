@@ -12,8 +12,8 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
     private $caret = 0;
     private static $stdFuncs = [
         'addcslashes', 'addslashes', 'bin2hex', 'chop', 'chunk_split',
-        'convert_cyr_string', 'convert_uudecode', 'convert_uuencode', 'crc32',
-        'crypt', 'hebrev', 'hebrevc', 'hex2bin', 'html_entity_decode',
+        'convert_cyr_string', 'convert_uudecode', 'convert_uuencode', 'count_chars',
+        'crc32', 'crypt', 'hebrev', 'hebrevc', 'hex2bin', 'html_entity_decode',
         'htmlentities', 'htmlspecialchars_decode', 'htmlspecialchars',
         'lcfirst', 'levenshtein', 'ltrim', 'md5', 'metaphone', 'nl2br', 'ord',
         'quoted_printable_decode', 'quoted_printable_encode', 'quotemeta',
@@ -32,6 +32,7 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         'convertCyrillic' => 'convert_cyr_string',
         'uudecode' => 'convert_uudecode',
         'uuencode' => 'convert_uuencode',
+        'countChars' => 'count_chars',
         'htmlEntityDecode' => 'html_entity_decode',
         'htmlEntityEncode' => 'htmlentities',
         'htmlSpecialCharsDecode' => 'htmlspecialchars_decode',

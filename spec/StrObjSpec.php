@@ -64,6 +64,16 @@ class StrObjSpec extends ObjectBehavior
         $this->uuencode()->uudecode()->raw->shouldBe('1');
     }
 
+    function it_can_countchars()
+    {
+        $this->beConstructedWith('Two Ts and one F.');
+        $result = $this->countChars(1)->getWrappedObject();
+
+        if ($result[ord('T')] != 2) {
+            throw new \Exception('Result is not 2 but rather '.$result[ord('T')]);
+        }
+    }
+
     function it_can_crc32()
     {
         $this->beConstructedWith('1');
@@ -284,196 +294,247 @@ class StrObjSpec extends ObjectBehavior
 
     function it_can_shuffle()
     {
-
+        $this->beConstructedWith('string to shuffle');
+        $this->shuffle();
+        // finish
     }
 
     function it_can_split()
     {
+        $this->beConstructedWith('Hello Friend');
+        $result = $this->split(3)->getWrappedObject();
 
+        if ($result[0] != 'Hel') {
+            throw new \Exception('Unexpected output');
+        }
     }
 
     function it_can_toArray()
     {
-        // same as above
+        $this->it_can_split();
     }
 
     function it_can_countwords()
     {
-
+        $this->beConstructedWith("Hello fri3nd, you're\n       looking          good today!");
+        $this->countWords(0, '3')->shouldBe(6);
     }
 
     function it_can_icompare()
     {
-
+        $this->beConstructedWith('Hello');
+        $this->icompare('hello')->shouldBe(0);
     }
 
-    function it_can_substringfromchartoend()
+    function it_can_substrfromchartoend()
     {
-
+        $this->beConstructedWith('name@example.com');
+        $this->substrFromCharToEnd('@')->raw->shouldBe('@example.com');
+        $this->substrFromCharToEnd('@', true)->raw->shouldBe('name');
     }
 
     function it_can_compare()
     {
-
+        $this->beConstructedWith('Hello');
+        $this->compare('hello')->shouldNotBe(0);
     }
 
     function it_can_comparelocale()
     {
-
+        $this->beConstructedWith('a');
+        $this->compareLocale('A')->shouldBe(32);
     }
 
     function it_can_lengthbeforecharmask()
     {
-
+        $this->beConstructedWith('hello');
+        $this->lengthBeforeCharMask('world')->shouldBe(2);
     }
 
     function it_can_striptags()
     {
-
+        $this->beConstructedWith('<p>Test paragraph.</p><!-- Comment --> <a href="#fragment">Other text</a>');
+        $this->stripTags('<p><a>')->raw->shouldBe('<p>Test paragraph.</p> <a href="#fragment">Other text</a>');
     }
 
     function it_can_stripcslashes()
     {
-
+        $this->beConstructedWith("\\'\\'");
+        $this->stripcslashes()->raw->shouldBe('\'\'');
     }
 
     function it_can_iindexof()
     {
-
+        $this->beConstructedWith('XYZ');
+        $this->iindexOf('x')->shouldBe(0);
     }
 
     function it_can_stripslashes()
     {
-
+        $this->beConstructedWith("\\'\\'");
+        $this->stripslashes()->raw->shouldBe('\'\'');
     }
 
     function it_can_isubstrfromstringtoend()
     {
-
+        $this->beConstructedWith('Hello World');
+        $this->isubstrFromStringToEnd('LO')->raw->shouldBe('lo World');
+        $this->isubstrFromStringToEnd('LO', true)->raw->shouldBe('Hel');
     }
 
     function it_can_length()
     {
-
+        $this->beConstructedWith('test');
+        $this->length()->shouldBe(4);
     }
 
     function it_can_icomparenatural()
     {
-
+        $this->beConstructedWith('Hello');
+        $this->icompareNatural('hello')->shouldBe(0);
     }
 
     function it_can_comparenatural()
     {
-
+        $this->beConstructedWith('Hello');
+        $this->compare('hello')->shouldNotBe(0);
     }
 
     function it_can_icomparefirstn()
     {
-
+        $this->beConstructedWith('Hello');
+        $this->icompareFirstN('hello', 2)->shouldBe(0);
     }
 
     function it_can_comparefirstn()
     {
-
+        $this->beConstructedWith('Hello');
+        $this->compareFirstN('hello', 2)->shouldNotBe(0);
     }
 
     function it_can_substrfromcharlisttoend()
     {
-
+        $this->beConstructedWith('This is a Simple text.');
+        $this->substrFromCharListToEnd('mi')->raw->shouldBe('is is a Simple text.');
     }
 
     function it_can_indexof()
     {
-
+        $this->beConstructedWith('abc');
+        $this->indexOf('a')->shouldBe(0);
+        $this->indexOf('a')->shouldNotBe(false);
     }
 
     function it_can_substrfromlastchartoend()
     {
-
+        $this->beConstructedWith("Line 1\nLine 2\nLine 3");
+        $this->substrFromLastCharToEnd("\n")->raw->shouldBe("\nLine 3");
     }
 
     function it_can_reverse()
     {
-
+        $this->beConstructedWith('Hello world!');
+        $this->reverse()->raw->shouldBe('!dlrow olleH');
     }
 
     function it_can_iindexoflast()
     {
-
+        $this->beConstructedWith('ababcd');
+        $this->iindexOfLast('aB')->shouldBe(2);
     }
 
     function it_can_indexoflast()
     {
-
+        $this->beConstructedWith('0123456789a123456789b123456789c');
+        $this->indexOfLast('7', -5)->shouldBe(17);
+        $this->indexOfLast('7', 20)->shouldBe(27);
+        $this->indexOfLast('7', 28)->shouldBe(false);
     }
 
     function it_can_lengthofmasked()
     {
-
+        $this->beConstructedWith('42 is the answer to the 128th question.');
+        $this->lengthOfMasked('1234567890')->shouldBe(2);
     }
 
     function it_can_substrfromstringtoend()
     {
-
+        $this->beConstructedWith('name@example.com');
+        $this->substrFromStringToEnd('@')->raw->shouldBe('@example.com');
+        $this->substrFromStringToEnd('@', true)->raw->shouldBe('name');
     }
 
     function it_can_tolowercase()
     {
-
+        $this->beConstructedWith('Mary Had A Little Lamb and She LOVED It So');
+        $this->toLowerCase()->raw->shouldBe('mary had a little lamb and she loved it so');
     }
 
     function it_can_tokenize()
     {
-
+        $this->beConstructedWith("This is\tan example\nstring");
+        $this->tokenize(" \n\t")->raw->shouldBe('This');
+        $this->nextToken(" \n\t")->raw->shouldBe('is');
+        $this->nextToken(" \n\t")->raw->shouldBe('an');
     }
 
     function it_can_touppercase()
     {
-
+        $this->beConstructedWith('Mary Had A Little Lamb and She LOVED It So');
+        $this->toUpperCase()->raw->shouldBe('MARY HAD A LITTLE LAMB AND SHE LOVED IT SO');
     }
 
     function it_can_translate()
     {
-
+        $this->beConstructedWith('hi all, I said hello');
+        $this->translate(["h" => "-", "hello" => "hi", "hi" => "hello"])->raw->shouldBe('hello all, I said hi');
     }
 
     function it_can_comparesubstr()
     {
-
+        $this->beConstructedWith('abcde');
+        $this->compareSubstr('bc', 1, 2)->shouldBe(0);
     }
 
     function it_can_countsubstr()
     {
-
+        $this->beConstructedWith('This is a test');
+        $this->countSubstr('is')->shouldBe(2);
     }
 
     function it_can_replace()
     {
-
+        $this->beConstructedWith('ABCDEFGH:/MNRPQR/');
+        $this->replace('bob', 10, -1)->raw->shouldBe('ABCDEFGH:/bob/');
     }
 
     function it_can_substr()
     {
-
+        $this->beConstructedWith('abcdef');
+        $this->substr(1, 3)->raw->shouldBe('bcd');
     }
 
     function it_can_trim()
     {
-
+        $this->beConstructedWith("\t\tThese are a few words :) ...  ");
+        $this->trim()->raw->shouldBe('These are a few words :) ...');
     }
 
     function it_can_firstchartouppercase()
     {
-
+        $this->beConstructedWith('hello world!');
+        $this->firstCharToUpperCase()->raw->shouldBe('Hello world!');
     }
 
     function it_can_wordstouppercase()
     {
-
+        $this->beConstructedWith('hello world!');
+        $this->wordsToUpperCase()->raw->shouldBe('Hello World!');
     }
 
     function it_can_wordwrap()
     {
-
+        $this->beConstructedWith('A very long woooooooooooord.');
+        $this->wordwrap(8, "\n", true)->raw->shouldBe("A very\nlong\nwooooooo\nooooord.");
     }
 }
