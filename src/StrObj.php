@@ -38,6 +38,7 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         'htmlSpecialCharsDecode' => 'htmlspecialchars_decode',
         'htmlSpecialCharsEncode' => 'htmlspecialchars',
         'firstCharToLowerCase' => 'lcfirst',
+        'toCharCode' => 'ord',
         'quotedPrintableDecode' => 'quoted_printable_decode',
         'quotedPrintableEncode' => 'quoted_printable_encode',
         'similarText' => 'similar_text',
@@ -87,6 +88,9 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
 
     public function __construct($raw)
     {
+        if (is_object($raw)) $raw = $raw->__toString();
+        if (is_array($raw)) $raw = implode($raw);
+
         $this->raw = $raw;
     }
 
@@ -123,6 +127,11 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
     public function charAt($i)
     {
         return $this->raw{$i};
+    }
+
+    public function charCodeAt($i)
+    {
+        return \ord($this->raw{$i});
     }
 
     public function isEmpty()

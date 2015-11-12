@@ -200,12 +200,6 @@ class StrObjSpec extends ObjectBehavior
         $this->nl2br(false)->raw->shouldBe("line one<br>\ntwo<br>\nthree");
     }
 
-    function it_can_ord()
-    {
-        $this->beConstructedWith("\n");
-        $this->ord()->shouldBe(10);
-    }
-
     function it_can_quotedprintabledecode()
     {
         $this->beConstructedWith('=3D');
@@ -309,9 +303,15 @@ class StrObjSpec extends ObjectBehavior
         }
     }
 
-    function it_can_toArray()
+    function it_can_toarray()
     {
         $this->it_can_split();
+    }
+
+    function it_can_tocharcode()
+    {
+        $this->beConstructedWith("\n");
+        $this->toCharCode()->shouldBe(10);
     }
 
     function it_can_countwords()
