@@ -86,24 +86,38 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         'wordsToUpperCase' => 'ucwords',
     ];
 
-    public function __construct($raw)
+    public function __construct($thing)
     {
-        if (is_object($raw)) $raw = $raw->__toString();
-        if (is_array($raw)) $raw = implode($raw);
+        if (is_object($thing) && !method_exists($thing, '__toString')) {
+            throw new \InvalidArgumentException(
+                'Object passed to constructor that does not implement __toString() method'
+            );
+        }
 
-        $this->raw = $raw;
+        if (is_array($thing)) $thing = implode($thing);
+
+        $this->raw = (string) $thing;
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->raw;
     }
 
+    /**
+     * @return mixed
+     */
     public function __get($name)
     {
         return $this->$name;
     }
 
+    /**
+     * @return mixed
+     */
     public function __call($method, $args)
     {
         if (\array_key_exists($method, self::$apiMap)) {
@@ -124,6 +138,9 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return new self($str);
     }
 
+    /**
+     * @return string
+     */
     public function charAt($i)
     {
         return $this->raw{$i};
@@ -235,6 +252,9 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return \call_user_func_array($func, $args);
     }
 
+    /**
+     * @return string|StrObj
+     */
     private function getSelfIfString($val)
     {
         if (\is_string($val)) {
