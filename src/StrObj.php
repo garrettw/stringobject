@@ -22,9 +22,9 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
 
     // STATIC FUNCTIONS
 
-    public static function make($str)
+    public static function make($thing)
     {
-        return new self($str);
+        return new self($thing);
     }
 
     // MAGIC METHODS
@@ -114,27 +114,13 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
 
     public function indexOf($needle, $offset = 0, $mode = self::NORMAL)
     {
-        switch ($mode) {
-            case self::NORMAL:
-                $funcname = 'strpos';
-                break;
-
-            case self::CASE_INSENSITIVE:
-                $funcname = 'stripos';
-                break;
-
-            case self::REVERSE:
-                $funcname = 'strrpos';
-                break;
-
-            case (self::REVERSE & self::CASE_INSENSITIVE):
-                $funcname = 'strripos';
-                break;
-
-            default:
-                throw new \InvalidArgumentException('Parameter 3 (mode) is invalid');
-        }
-        return \call_user_func($funcname, $this->raw, $needle, $offset);
+        $modemap = [
+            self::NORMAL => 'strpos',
+            self::CASE_INSENSITIVE => 'stripos',
+            self::REVERSE => 'strrpos',
+            (self::REVERSE | self::CASE_INSENSITIVE) => 'strripos',
+        ];
+        return \call_user_func($modemap[$mode], $this->raw, $needle, $offset);
     }
 
     public function length()
@@ -151,7 +137,7 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
 
     public function concat($str)
     {
-        return new self($this->raw . $str);
+        return $this->append($str);
     }
 
     public function nextToken($delim)
@@ -186,6 +172,14 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return new self(\str_replace($search, $replace, $this->raw));
     }
 
+    public function replaceSubstr($replacement, $start, $length = null)
+    {
+        if ($length === null) {
+            $length = $this->length();
+        }
+        return new self(\substr_replace($this->raw, $replacement, $start, $length));
+    }
+
     public function resetToken()
     {
         $this->token = false;
@@ -201,6 +195,11 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return new self(\str_shuffle($this->raw));
     }
 
+    public function times($times)
+    {
+        return $this->repeat($times);
+    }
+
     public function translate($search, $replace = '')
     {
         if (is_array($search)) {
@@ -211,24 +210,12 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
 
     public function trim($mask = " \t\n\r\0\x0B", $mode = self::BOTH_ENDS)
     {
-        switch ($mode) {
-            case self::NORMAL:
-            case self::BOTH_ENDS:
-                $funcname = 'trim';
-                break;
-
-            case self::START:
-                $funcname = 'ltrim';
-                break;
-
-            case self::END:
-                $funcname = 'rtrim';
-                break;
-
-            default:
-                throw new \InvalidArgumentException('Parameter 1 (mode) is invalid');
-        }
-        return new self(\call_user_func($funcname, $this->raw, $mask));
+        $modemap = [
+            self::START => 'ltrim',
+            self::END => 'rtrim',
+            self::BOTH_ENDS => 'trim',
+        ];
+        return new self(\call_user_func($modemap[$mode], $this->raw, $mask));
     }
 
     public function wordwrap($width = 75, $break = "\n")
@@ -307,12 +294,12 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return $this->raw{$offset};
     }
 
-    public function offsetSet()
+    public function offsetSet($offset, $value)
     {
         throw new \LogicException('Invalid assignment operation on immutable StrObj instance');
     }
 
-    public function offsetUnset()
+    public function offsetUnset($offset)
     {
         throw new \LogicException('Invalid unset operation on immutable StrObj instance');
     }
