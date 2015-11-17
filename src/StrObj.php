@@ -16,9 +16,9 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
 
     // PROPERTIES
 
-    private $raw;
-    private $token = false;
-    private $caret = 0;
+    protected $raw;
+    protected $token = false;
+    protected $caret = 0;
 
     // STATIC FUNCTIONS
 
@@ -74,11 +74,16 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return new self($this->raw{$offset});
     }
 
-    public function charCodeAt($offset, $utf8 = true)
+    public function charCodeAt($offset)
     {
-        $code = \ord($this->raw{$offset});
+        return \ord($this->raw{$offset});
+    }
 
-        if ($utf8 === true && $code > 191 && $code < 248) {
+    public function utf8CodeAt($offset)
+    {
+        $code = $this->charCodeAt($offset);
+
+        if ($code > 191 && $code < 248) {
             $extrabytes = 1;
             $bigcode = $code & 31;
 
@@ -226,9 +231,14 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return new self(\call_user_func($funcname, $this->raw, $mask));
     }
 
-    public function wordwrap($width = 75, $break = "\n", $cut = false)
+    public function wordwrap($width = 75, $break = "\n")
     {
-        return new self(\wordwrap($this->raw, $width, $break, $cut));
+        return new self(\wordwrap($this->raw, $width, $break, false));
+    }
+
+    public function wordwrapBreaking($width = 75, $break = "\n")
+    {
+        return new self(\wordwrap($this->raw, $width, $break, true));
     }
 
     // TESTING METHODS
@@ -297,12 +307,12 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return $this->raw{$offset};
     }
 
-    public function offsetSet($offset, $value)
+    public function offsetSet()
     {
         throw new \LogicException('Invalid assignment operation on immutable StrObj instance');
     }
 
-    public function offsetUnset($offset)
+    public function offsetUnset()
     {
         throw new \LogicException('Invalid unset operation on immutable StrObj instance');
     }
@@ -320,6 +330,9 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
 
     // PRIVATE STATIC FUNCTIONS
 
+    /**
+     * @return mixed
+     */
     private static function newSelfIfString($val)
     {
         if (\is_string($val)) {
@@ -328,7 +341,7 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return $val;
     }
 
-    private static function stringableOrDie($thing)
+    protected static function stringableOrDie($thing)
     {
         if (\is_object($thing) && !\method_exists($thing, '__toString')) {
             throw new \InvalidArgumentException(

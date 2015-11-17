@@ -27,14 +27,14 @@ class TokenIterator implements \Iterator
 
     public function next()
     {
-        $this->curval = $this->strobj->strtok($this->delim);
+        $this->curval = $this->strobj->nextToken($this->delim);
         $this->index++;
     }
 
     public function rewind()
     {
         $this->strobj->resetToken();
-        $this->curval = $this->strobj->strtok($this->delim);
+        $this->curval = $this->strobj->nextToken($this->delim);
         $this->index = 0;
     }
 
