@@ -4,107 +4,40 @@ namespace StringObject;
 
 class StrObj implements \ArrayAccess, \Countable, \Iterator
 {
-    const CASE_SENSITIVE = 0;
-    const CASE_INSENSITIVE = 1;
+    // CONSTANTS
+
+    const NORMAL = 0;
+    const START = 0;
+    const END = 1;
+    const BOTH_ENDS = 2;
+    const CASE_INSENSITIVE = 4;
+    const REVERSE = 8;
+    const AT_POSITION = 16;
+
+    // PROPERTIES
 
     private $raw;
     private $token = false;
     private $caret = 0;
-    private static $stdFuncs = [
-        'addcslashes', 'addslashes', 'bin2hex', 'chop', 'chunk_split',
-        'convert_cyr_string', 'convert_uudecode', 'convert_uuencode', 'count_chars',
-        'crc32', 'crypt', 'hebrev', 'hebrevc', 'hex2bin', 'html_entity_decode',
-        'htmlentities', 'htmlspecialchars_decode', 'htmlspecialchars',
-        'lcfirst', 'levenshtein', 'ltrim', 'md5', 'metaphone', 'nl2br', 'ord',
-        'quoted_printable_decode', 'quoted_printable_encode', 'quotemeta',
-        'rtrim', 'sha1', 'similar_text', 'soundex', 'sscanf', 'str_getcsv',
-        'str_pad', 'str_repeat', 'str_rot13', 'str_shuffle', 'str_split',
-        'str_word_count', 'strcasecmp', 'strchr', 'strcmp', 'strcoll',
-        'strcspn', 'strip_tags', 'stripcslashes', 'stripos', 'stripslashes',
-        'stristr', 'strlen', 'strnatcasecmp', 'strnatcmp', 'strncasecmp',
-        'strncmp', 'strpbrk', 'strpos', 'strrchr', 'strrev', 'strripos',
-        'strrpos', 'strspn', 'strstr', 'strtolower', 'strtoupper', 'strtr',
-        'substr_compare', 'substr_count', 'substr_replace', 'substr', 'trim',
-        'ucfirst', 'ucwords', 'wordwrap',
-    ];
-    private static $apiMap = [ // 'new' => 'old'
-        'chunkSplit' => 'chunk_split',
-        'convertCyrillic' => 'convert_cyr_string',
-        'uudecode' => 'convert_uudecode',
-        'uuencode' => 'convert_uuencode',
-        'countChars' => 'count_chars',
-        'htmlEntityDecode' => 'html_entity_decode',
-        'htmlEntityEncode' => 'htmlentities',
-        'htmlSpecialCharsDecode' => 'htmlspecialchars_decode',
-        'htmlSpecialCharsEncode' => 'htmlspecialchars',
-        'firstCharToLowerCase' => 'lcfirst',
-        'toCharCode' => 'ord',
-        'quotedPrintableDecode' => 'quoted_printable_decode',
-        'quotedPrintableEncode' => 'quoted_printable_encode',
-        'similarText' => 'similar_text',
-        'scanf' => 'sscanf',
-        'getCSV' => 'str_getcsv',
-        'pad' => 'str_pad',
-        'repeat' => 'str_repeat',
-        'times' => 'str_repeat',
-        'rot13' => 'str_rot13',
-        'shuffle' => 'str_shuffle',
-        'split' => 'str_split',
-        'toArray' => 'str_split',
-        'countWords' => 'str_word_count',
-        'icompare' => 'strcasecmp',
-        'substrFromCharToEnd' => 'strchr',
-        'compare' => 'strcmp',
-        'compareLocale' => 'strcoll',
-        'lengthBeforeCharMask' => 'strcspn',
-        'stripTags' => 'strip_tags',
-        'iindexOf' => 'stripos',
-        'isubstrFromCharToEnd' => 'stristr',
-        'isubstrFromStringToEnd' => 'stristr',
-        'length' => 'strlen',
-        'icompareNatural' => 'strnatcasecmp',
-        'compareNatural' => 'strnatcmp',
-        'icompareFirstN' => 'strncasecmp',
-        'compareFirstN' => 'strncmp',
-        'substrFromCharListToEnd' => 'strpbrk',
-        'indexOf' => 'strpos',
-        'substrFromLastCharToEnd' => 'strrchr',
-        'reverse' => 'strrev',
-        'iindexOfLast' => 'strripos',
-        'indexOfLast' => 'strrpos',
-        'lengthOfMasked' => 'strspn',
-        'substrFromStringToEnd' => 'strstr',
-        'toLowerCase' => 'strtolower',
-        'tokenize' => 'strtok',
-        'nextToken' => 'strtok',
-        'toUpperCase' => 'strtoupper',
-        'translate' => 'strtr',
-        'compareSubstr' => 'substr_compare',
-        'countSubstr' => 'substr_count',
-        'replace' => 'substr_replace',
-        'firstCharToUpperCase' => 'ucfirst',
-        'wordsToUpperCase' => 'ucwords',
-    ];
+
+    // STATIC FUNCTIONS
+
+    public static function make($str)
+    {
+        return new self($str);
+    }
+
+    // MAGIC METHODS
 
     public function __construct($thing)
     {
-        if (is_object($thing) && !method_exists($thing, '__toString')) {
-            throw new \InvalidArgumentException(
-                'Object passed to constructor that does not implement __toString() method'
-            );
+        self::stringableOrDie($thing);
+
+        if (is_array($thing)) {
+            $thing = \implode($thing);
         }
 
-        if (is_array($thing)) $thing = implode($thing);
-
         $this->raw = (string) $thing;
-    }
-
-    /**
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->raw;
     }
 
     /**
@@ -116,62 +49,107 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
     }
 
     /**
-     * @return mixed
-     */
-    public function __call($method, $args)
-    {
-        if (\array_key_exists($method, self::$apiMap)) {
-            $result = \call_user_func_array([$this, self::$apiMap[$method]], $args);
-            return $this->getSelfIfString($result);
-        }
-
-        if (!\in_array($method, self::$stdFuncs)) {
-            throw new \BadMethodCallException("Method $method does not exist");
-        }
-
-        \array_unshift($args, $this->raw);
-        return $this->getSelfIfString(\call_user_func_array($method, $args));
-    }
-
-    public static function make($str)
-    {
-        return new self($str);
-    }
-
-    /**
      * @return string
      */
-    public function charAt($i)
+    public function __toString()
     {
-        return $this->raw{$i};
+        return $this->raw;
     }
 
-    public function charCodeAt($i)
+    public function toArray($delim = '', $limit = false)
     {
-        return \ord($this->raw{$i});
+        if (empty($delim)) {
+            return \str_split($this->raw);
+        }
+        if ($limit === false) {
+            return \explode($delim, $this->raw);
+        }
+        return \explode($delim, $this->raw, $limit);
     }
 
-    public function isEmpty()
+    // INFORMATIONAL METHODS
+
+    public function charAt($offset)
     {
-        return empty($this->raw);
+        return new self($this->raw{$offset});
     }
 
-    public function explode()
+    public function charCodeAt($offset, $utf8 = true)
     {
-        return $this->callWithAltArgPos('explode', \func_get_args(), 1);
+        $code = \ord($this->raw{$offset});
+
+        if ($utf8 === true && $code > 191 && $code < 248) {
+            $extrabytes = 1;
+            $bigcode = $code & 31;
+
+            if ($code > 223) {
+                $extrabytes++;
+                $bigcode &= 15;
+            }
+
+            if ($code > 239) {
+                $extrabytes++;
+                $bigcode &= 7;
+            }
+
+            if ($offset + $extrabytes >= $this->length()) {
+                // in case the string is too short to have all the indicated bytes
+                return $code;
+            }
+
+            for ($next = 1; $next <= $extrabytes; $next++) {
+                $bigcode <<= 6;
+                $bigcode += \ord($this->raw{$offset + $next}) & 63;
+            }
+            $code = $bigcode;
+        }
+
+        return $code;
     }
 
-    public function str_ireplace()
+    public function indexOf($needle, $offset = 0, $mode = self::NORMAL)
     {
-        return new self($this->callWithAltArgPos('str_ireplace', \func_get_args(), 2));
+        switch ($mode) {
+            case self::NORMAL:
+                $funcname = 'strpos';
+                break;
+
+            case self::CASE_INSENSITIVE:
+                $funcname = 'stripos';
+                break;
+
+            case self::REVERSE:
+                $funcname = 'strrpos';
+                break;
+
+            case (self::REVERSE & self::CASE_INSENSITIVE):
+                $funcname = 'strripos';
+                break;
+
+            default:
+                throw new \InvalidArgumentException('Parameter 3 (mode) is invalid');
+        }
+        return \call_user_func($funcname, $this->raw, $needle, $offset);
     }
 
-    public function str_replace()
+    public function length()
     {
-        return new self($this->callWithAltArgPos('str_replace', \func_get_args(), 2));
+        return \strlen($this->raw);
     }
 
-    public function strtok($delim)
+    // MODIFYING METHODS
+
+    public function append($str)
+    {
+        return new self($this->raw . $str);
+    }
+
+    public function concat($str)
+    {
+        return new self($this->raw . $str);
+    }
+
+    public function nextToken($delim)
     {
         if ($this->token) {
             return new self(\strtok($delim));
@@ -180,20 +158,103 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return new self(\strtok($this->raw, $delim));
     }
 
-    public function resetToken()
+    public function pad($length, $padding = ' ', $mode = self::END)
     {
-        $this->token = false;
-    }
-
-    public function append($str)
-    {
-        return new self($this->raw . $str);
+        return new self(\str_pad($this->raw, $length, $padding, $mode));
     }
 
     public function prepend($str)
     {
         return new self($str . $this->raw);
     }
+
+    public function repeat($x)
+    {
+        return new self(\str_repeat($this->raw, $x));
+    }
+
+    public function replace($search, $replace, $mode = self::NORMAL)
+    {
+        if ($mode & self::CASE_INSENSITIVE) {
+            return new self(\str_ireplace($search, $replace, $this->raw));
+        }
+        return new self(\str_replace($search, $replace, $this->raw));
+    }
+
+    public function resetToken()
+    {
+        $this->token = false;
+    }
+
+    public function reverse()
+    {
+        return new self(\strrev($this->raw));
+    }
+
+    public function shuffle()
+    {
+        return new self(\str_shuffle($this->raw));
+    }
+
+    public function translate($from, $to = '')
+    {
+        if (is_array($from)) {
+            return new self(\strtr($this->raw, $from));
+        }
+        return new self(\strtr($this->raw, $from, $to));
+    }
+
+    public function trim($mask = " \t\n\r\0\x0B", $mode = self::BOTH_ENDS)
+    {
+        switch ($mode) {
+            case self::NORMAL:
+            case self::BOTH_ENDS:
+                $funcname = 'trim';
+                break;
+
+            case self::START:
+                $funcname = 'ltrim';
+                break;
+
+            case self::END:
+                $funcname = 'rtrim';
+                break;
+
+            default:
+                throw new \InvalidArgumentException('Parameter 1 (mode) is invalid');
+        }
+        return new self(\call_user_func($funcname, $this->raw, $mask));
+    }
+
+    public function wordwrap($width = 75, $break = "\n", $cut = false)
+    {
+        return new self(\wordwrap($this->raw, $width, $break, $cut));
+    }
+
+    // TESTING METHODS
+
+    public function contains($needle, $offset = 0, $mode = self::NORMAL)
+    {
+        if ($mode & self::AT_POSITION) {
+            return ($this->indexOf($needle, $offset, $mode) === $offset);
+        }
+        return ($this->indexOf($needle, $offset, $mode) !== false);
+    }
+
+    public function equals($str)
+    {
+        self::stringableOrDie($str);
+
+        $str = (string) $str;
+        return ($str == $this->raw);
+    }
+
+    public function isEmpty()
+    {
+        return empty($this->raw);
+    }
+
+    // INTERFACE IMPLEMENTATION METHODS
 
     public function count()
     {
@@ -246,20 +307,33 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         throw new \LogicException('Invalid unset operation on immutable StrObj instance');
     }
 
+    // PRIVATE METHODS
+
+    /**
+     * @return string|StrObj
+     */
     private function callWithAltArgPos($func, $args, $pos)
     {
         \array_splice($args, $pos, 0, $this->raw);
         return \call_user_func_array($func, $args);
     }
 
-    /**
-     * @return string|StrObj
-     */
-    private function getSelfIfString($val)
+    // PRIVATE STATIC FUNCTIONS
+
+    private static function newSelfIfString($val)
     {
         if (\is_string($val)) {
             return new self($val);
         }
         return $val;
+    }
+
+    private static function stringableOrDie($thing)
+    {
+        if (\is_object($thing) && !\method_exists($thing, '__toString')) {
+            throw new \InvalidArgumentException(
+                'Parameter is an object that does not implement __toString() method'
+            );
+        }
     }
 }
