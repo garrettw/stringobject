@@ -173,9 +173,9 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return new self($str . $this->raw);
     }
 
-    public function repeat($x)
+    public function repeat($times)
     {
-        return new self(\str_repeat($this->raw, $x));
+        return new self(\str_repeat($this->raw, $times));
     }
 
     public function replace($search, $replace, $mode = self::NORMAL)
@@ -201,12 +201,12 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return new self(\str_shuffle($this->raw));
     }
 
-    public function translate($from, $to = '')
+    public function translate($search, $replace = '')
     {
-        if (is_array($from)) {
-            return new self(\strtr($this->raw, $from));
+        if (is_array($search)) {
+            return new self(\strtr($this->raw, $search));
         }
-        return new self(\strtr($this->raw, $from, $to));
+        return new self(\strtr($this->raw, $search, $replace));
     }
 
     public function trim($mask = " \t\n\r\0\x0B", $mode = self::BOTH_ENDS)
