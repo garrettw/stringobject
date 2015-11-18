@@ -198,14 +198,19 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return new self(\strtok($this->raw, $delim));
     }
 
-    public function pad($length, $padding = ' ', $mode = self::END)
+    public function pad($newlength, $padding = ' ', $mode = self::END)
     {
-        return new self(\str_pad($this->raw, $length, $padding, $mode));
+        return new self(\str_pad($this->raw, $newlength, $padding, $mode));
     }
 
     public function prepend($str)
     {
         return new self($str . $this->raw);
+    }
+
+    public function remove($str, $mode = self::NORMAL)
+    {
+        return $this->replace($str, '', $mode);
     }
 
     public function removeSubstr($start, $length = null)
