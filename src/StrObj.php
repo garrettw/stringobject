@@ -61,7 +61,7 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return $this->raw;
     }
 
-    public function toArray($delim = '', $limit = false)
+    public function toArray($delim = '', $limit = null)
     {
         if (empty($delim)) {
             return \str_split($this->raw);
@@ -69,7 +69,7 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         if (is_int($delim)) {
             return \str_split($this->raw, $delim);
         }
-        if ($limit === false) {
+        if ($limit === null) {
             return \explode($delim, $this->raw);
         }
         return \explode($delim, $this->raw, $limit);
@@ -328,7 +328,9 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
 
     public function isAscii()
     {
-        for ($i = 0; $i < \strlen($this->raw); $i++) {
+        $len = $this->length();
+
+        for ($i = 0; $i < $len; $i++) {
             if ($this->charCodeAt($i) >= 128) {
                 return false;
             }
@@ -386,23 +388,12 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
 
     public function offsetSet($offset, $value)
     {
-        throw new \LogicException('Invalid assignment operation on immutable StrObj instance');
+        throw new \LogicException("Cannot assign $value to immutable StrObj instance at index $offset");
     }
 
     public function offsetUnset($offset)
     {
-        throw new \LogicException('Invalid unset operation on immutable StrObj instance');
-    }
-
-    // PRIVATE METHODS
-
-    /**
-     * @return string|StrObj
-     */
-    private function callWithAltArgPos($func, $args, $pos)
-    {
-        \array_splice($args, $pos, 0, $this->raw);
-        return \call_user_func_array($func, $args);
+        throw new \LogicException("Cannot unset index $offset on immutable StrObj instance");
     }
 
     // PRIVATE STATIC FUNCTIONS

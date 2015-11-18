@@ -8,7 +8,6 @@ class Chunks implements \ArrayAccess, \Countable, \Iterator
     private $length;
     private $ending;
     private $index = 0;
-    private $curval;
 
     public function __construct(StrObj $so, $length = 76, $ending = "\r\n")
     {
@@ -24,11 +23,7 @@ class Chunks implements \ArrayAccess, \Countable, \Iterator
 
     public function current()
     {
-        $offset = $this->index * $this->length;
-        return $this->strobj->substr(
-            $offset,
-            \min($offset + $this->length, $this->strobj->length() - $offset)
-        )->append($this->ending);
+        return $this->offsetGet($this->index);
     }
 
     public function key()
