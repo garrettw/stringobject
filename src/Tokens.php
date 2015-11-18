@@ -2,7 +2,7 @@
 
 namespace StringObject;
 
-class TokenIterator implements \Iterator
+class Tokens implements \Iterator
 {
     private $strobj;
     private $delim;
@@ -12,6 +12,11 @@ class TokenIterator implements \Iterator
     public function __construct(StrObj $so, $delim)
     {
         $this->strobj = $so;
+        $this->delim = $delim;
+    }
+
+    public function changeToken($delim)
+    {
         $this->delim = $delim;
     }
 
@@ -41,10 +46,5 @@ class TokenIterator implements \Iterator
     public function valid()
     {
         return ($this->curval !== false);
-    }
-
-    public function changeToken($delim)
-    {
-        $this->delim = $delim;
     }
 }

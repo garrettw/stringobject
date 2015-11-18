@@ -162,6 +162,12 @@ class StrObjSpec extends ObjectBehavior
         $this->wordwrapBreaking(8, "\n")->raw->shouldBe("A very\nlong\nwooooooo\nooooord.");
     }
 
+    function it_can_isascii()
+    {
+        $this->beConstructedWith('test');
+        $this->isAscii()->shouldBe(true);
+    }
+
     function it_can_test_empty_on_empty_string()
     {
         $this->beConstructedWith('');

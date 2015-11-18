@@ -13,6 +13,11 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
     const CASE_INSENSITIVE = 4;
     const REVERSE = 8;
     const AT_POSITION = 16;
+    const CURRENT_LOCALE = 32;
+    const NATURAL_ORDER = 64;
+    const FIRST_N = 128;
+    const C_STYLE = 256;
+    const META = 512;
 
     // PROPERTIES
 
@@ -61,6 +66,9 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         if (empty($delim)) {
             return \str_split($this->raw);
         }
+        if (is_int($delim)) {
+            return \str_split($this->raw, $delim);
+        }
         if ($limit === false) {
             return \explode($delim, $this->raw);
         }
@@ -77,6 +85,40 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
     public function charCodeAt($offset)
     {
         return \ord($this->raw{$offset});
+    }
+
+    public function compareTo($str, $mode = self::NORMAL, $length = 1)
+    {
+        $modemap = [
+            self::NORMAL => 'strcmp',
+            self::CASE_INSENSITIVE => 'strcasecmp',
+            self::CURRENT_LOCALE => 'strcoll',
+            self::NATURAL_ORDER => 'strnatcmp',
+            (self::NATURAL_ORDER | self::CASE_INSENSITIVE) => 'strnatcasecmp',
+            self::FIRST_N => 'strncmp',
+            (self::FIRST_N | self::CASE_INSENSITIVE) => 'strncasecmp',
+        ];
+
+        if ($mode & self::FIRSTN) {
+            return \call_user_func($modemap[$mode], $this->raw, $str, $length);
+        }
+        return \call_user_func($modemap[$mode], $this->raw, $str);
+    }
+
+    public function indexOf($needle, $offset = 0, $mode = self::NORMAL)
+    {
+        $modemap = [
+            self::NORMAL => 'strpos',
+            self::CASE_INSENSITIVE => 'stripos',
+            self::REVERSE => 'strrpos',
+            (self::REVERSE | self::CASE_INSENSITIVE) => 'strripos',
+        ];
+        return \call_user_func($modemap[$mode], $this->raw, $needle, $offset);
+    }
+
+    public function length()
+    {
+        return \strlen($this->raw);
     }
 
     public function utf8CodeAt($offset)
@@ -112,22 +154,6 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return $code;
     }
 
-    public function indexOf($needle, $offset = 0, $mode = self::NORMAL)
-    {
-        $modemap = [
-            self::NORMAL => 'strpos',
-            self::CASE_INSENSITIVE => 'stripos',
-            self::REVERSE => 'strrpos',
-            (self::REVERSE | self::CASE_INSENSITIVE) => 'strripos',
-        ];
-        return \call_user_func($modemap[$mode], $this->raw, $needle, $offset);
-    }
-
-    public function length()
-    {
-        return \strlen($this->raw);
-    }
-
     // MODIFYING METHODS
 
     public function append($str)
@@ -135,9 +161,32 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return new self($this->raw . $str);
     }
 
+    public function chunk($length = 76, $ending = "\r\n")
+    {
+        return new self(\chunk_split($this->raw, $length, $ending));
+    }
+
     public function concat($str)
     {
         return $this->append($str);
+    }
+
+    public function escape($mode = self::NORMAL, $charlist = '')
+    {
+        $modemap = [
+            self::NORMAL => 'addslashes',
+            self::C_STYLE => 'addcslashes',
+            self::META => 'quotemeta',
+        ];
+        if ($mode === self::C_STYLE) {
+            return new self(\call_user_func($modemap[$mode], $this->raw, $charlist));
+        }
+        return new self(\call_user_func($modemap[$mode], $this->raw));
+    }
+
+    public function insertAt($str, $offset)
+    {
+        return $this->replaceSubstr($str, $offset, 0);
     }
 
     public function nextToken($delim)
@@ -157,6 +206,11 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
     public function prepend($str)
     {
         return new self($str . $this->raw);
+    }
+
+    public function removeSubstr($start, $length = null)
+    {
+        return $this->replaceSubstr('', $start, $length);
     }
 
     public function repeat($times)
@@ -195,6 +249,14 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return new self(\str_shuffle($this->raw));
     }
 
+    public function substr($start, $length = 'omitted')
+    {
+        if ($length === 'omitted') {
+            return new self(\substr($this->raw, $start));
+        }
+        return new self(\substr($this->raw, $start, $length));
+    }
+
     public function times($times)
     {
         return $this->repeat($times);
@@ -218,6 +280,16 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return new self(\call_user_func($modemap[$mode], $this->raw, $mask));
     }
 
+    public function unescape($mode = self::NORMAL)
+    {
+        $modemap = [
+            self::NORMAL => 'stripslashes',
+            self::C_STYLE => 'stripcslashes',
+            self::META => 'stripslashes',
+        ];
+        return new self(\call_user_func($modemap[$mode], $this->raw));
+    }
+
     public function wordwrap($width = 75, $break = "\n")
     {
         return new self(\wordwrap($this->raw, $width, $break, false));
@@ -238,12 +310,30 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return ($this->indexOf($needle, $offset, $mode) !== false);
     }
 
+    public function countSubstr($needle, $offset = 0, $length = null)
+    {
+        if ($length === null) {
+            return \substr_count($this->raw, $needle, $offset);
+        }
+        return \substr_count($this->raw, $needle, $offset, $length);
+    }
+
     public function equals($str)
     {
         self::stringableOrDie($str);
 
         $str = (string) $str;
         return ($str == $this->raw);
+    }
+
+    public function isAscii()
+    {
+        for ($i = 0; $i < \strlen($this->raw); $i++) {
+            if ($this->charCodeAt($i) >= 128) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public function isEmpty()
