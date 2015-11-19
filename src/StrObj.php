@@ -12,12 +12,14 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
     const BOTH_ENDS = 2;
     const CASE_INSENSITIVE = 4;
     const REVERSE = 8;
-    const AT_POSITION = 16;
+    const EXACT_POSITION = 16;
     const CURRENT_LOCALE = 32;
     const NATURAL_ORDER = 64;
     const FIRST_N = 128;
     const C_STYLE = 256;
     const META = 512;
+    const LAZY = 1024;
+    const GREEDY = 2048;
 
     // PROPERTIES
 
@@ -36,10 +38,10 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
 
     public function __construct($thing)
     {
-        self::stringableOrDie($thing);
+        self::testStringableObject($thing);
 
         if (is_array($thing)) {
-            $thing = \implode($thing);
+            throw new \InvalidArgumentException('Unsure of how to convert array to string');
         }
 
         $this->raw = (string) $thing;
@@ -84,46 +86,7 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
 
     public function charCodeAt($offset)
     {
-        return \ord($this->raw{$offset});
-    }
-
-    public function compareTo($str, $mode = self::NORMAL, $length = 1)
-    {
-        $modemap = [
-            self::NORMAL => 'strcmp',
-            self::CASE_INSENSITIVE => 'strcasecmp',
-            self::CURRENT_LOCALE => 'strcoll',
-            self::NATURAL_ORDER => 'strnatcmp',
-            (self::NATURAL_ORDER | self::CASE_INSENSITIVE) => 'strnatcasecmp',
-            self::FIRST_N => 'strncmp',
-            (self::FIRST_N | self::CASE_INSENSITIVE) => 'strncasecmp',
-        ];
-
-        if ($mode & self::FIRSTN) {
-            return \call_user_func($modemap[$mode], $this->raw, $str, $length);
-        }
-        return \call_user_func($modemap[$mode], $this->raw, $str);
-    }
-
-    public function indexOf($needle, $offset = 0, $mode = self::NORMAL)
-    {
-        $modemap = [
-            self::NORMAL => 'strpos',
-            self::CASE_INSENSITIVE => 'stripos',
-            self::REVERSE => 'strrpos',
-            (self::REVERSE | self::CASE_INSENSITIVE) => 'strripos',
-        ];
-        return \call_user_func($modemap[$mode], $this->raw, $needle, $offset);
-    }
-
-    public function length()
-    {
-        return \strlen($this->raw);
-    }
-
-    public function utf8CodeAt($offset)
-    {
-        $code = $this->charCodeAt($offset);
+        $code = \ord($this->raw{$offset});
 
         if ($code > 191 && $code < 248) {
             $extrabytes = 1;
@@ -152,6 +115,43 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         }
 
         return $code;
+    }
+
+    public function compareTo($str, $mode = self::NORMAL, $length = 1)
+    {
+        $modemap = [
+            self::NORMAL => 'strcmp',
+            self::CASE_INSENSITIVE => 'strcasecmp',
+            self::CURRENT_LOCALE => 'strcoll',
+            self::NATURAL_ORDER => 'strnatcmp',
+            (self::NATURAL_ORDER | self::CASE_INSENSITIVE) => 'strnatcasecmp',
+            self::FIRST_N => 'strncmp',
+            (self::FIRST_N | self::CASE_INSENSITIVE) => 'strncasecmp',
+        ];
+
+        if ($mode & self::FIRST_N) {
+            return \call_user_func($modemap[$mode], $this->raw, $str, $length);
+        }
+        return \call_user_func($modemap[$mode], $this->raw, $str);
+    }
+
+    public function indexOf($needle, $offset = 0, $mode = self::NORMAL)
+    {
+        // strip out bits we don't understand
+        $mode &= (self::REVERSE | self::CASE_INSENSITIVE);
+
+        $modemap = [
+            self::NORMAL => 'strpos',
+            self::CASE_INSENSITIVE => 'stripos',
+            self::REVERSE => 'strrpos',
+            (self::REVERSE | self::CASE_INSENSITIVE) => 'strripos',
+        ];
+        return \call_user_func($modemap[$mode], $this->raw, $needle, $offset);
+    }
+
+    public function length()
+    {
+        return \strlen($this->raw);
     }
 
     // MODIFYING METHODS
@@ -309,7 +309,7 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
 
     public function contains($needle, $offset = 0, $mode = self::NORMAL)
     {
-        if ($mode & self::AT_POSITION) {
+        if ($mode & self::EXACT_POSITION) {
             return ($this->indexOf($needle, $offset, $mode) === $offset);
         }
         return ($this->indexOf($needle, $offset, $mode) !== false);
@@ -323,9 +323,16 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return \substr_count($this->raw, $needle, $offset, $length);
     }
 
+    public function endsWith($str, $mode = self::NORMAL)
+    {
+        $mode &= self::CASE_INSENSITIVE;
+        $offset = $this->length() - \strlen($str);
+        return $this->contains($str, $offset, $mode | self::EXACT_POSITION | self::REVERSE);
+    }
+
     public function equals($str)
     {
-        self::stringableOrDie($str);
+        self::testStringableObject($str);
 
         $str = (string) $str;
         return ($str == $this->raw);
@@ -346,6 +353,12 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
     public function isEmpty()
     {
         return empty($this->raw);
+    }
+
+    public function startsWith($str, $mode = self::NORMAL)
+    {
+        $mode &= self::CASE_INSENSITIVE;
+        return $this->contains($str, 0, $mode | self::EXACT_POSITION);
     }
 
     // INTERFACE IMPLEMENTATION METHODS
@@ -403,7 +416,7 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
 
     // PRIVATE STATIC FUNCTIONS
 
-    protected static function stringableOrDie($thing)
+    protected static function testStringableObject($thing)
     {
         if (\is_object($thing) && !\method_exists($thing, '__toString')) {
             throw new \InvalidArgumentException(
