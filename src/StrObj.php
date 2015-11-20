@@ -424,6 +424,16 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return new self(\call_user_func($modemap[$mode], $this->raw));
     }
 
+    public function uuDecode()
+    {
+        return new self(\convert_uudecode($this->raw));
+    }
+
+    public function uuEncode()
+    {
+        return new self(\convert_uuencode($this->raw));
+    }
+
     public function wordwrap($width = 75, $break = "\n")
     {
         return new self(\wordwrap($this->raw, $width, $break, false));

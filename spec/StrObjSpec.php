@@ -236,6 +236,18 @@ class StrObjSpec extends ObjectBehavior
         $this->unescape(StrObj::META)->raw->shouldBe('Hello world. (can you hear me?)');
     }
 
+    function it_can_uudecode()
+    {
+        $this->beConstructedWith("+22!L;W9E(%!(4\"$`\n`");
+        $this->uuDecode()->raw->shouldBe('I love PHP!');
+    }
+
+    function it_can_uuencode()
+    {
+        $this->beConstructedWith("test\ntext text\r\n");
+        $this->uuEncode()->raw->shouldBe("0=&5S=`IT97AT('1E>'0-\"@``\n`\n");
+    }
+
     function it_can_wordwrap()
     {
         $this->beConstructedWith('A very long woooooooooooord.');
