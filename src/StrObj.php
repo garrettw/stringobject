@@ -227,6 +227,9 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return new self($this->raw{$offset});
     }
 
+    /**
+     * @param integer $offset
+     */
     public function charCodeAt($offset)
     {
         if ($this->encoding === self::WINDOWS1252) {
@@ -354,6 +357,9 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return new self(\str_repeat($this->raw, $times));
     }
 
+    /**
+     * @param string $replace
+     */
     public function replace($search, $replace, $mode = self::NORMAL)
     {
         if ($mode & self::CASE_INSENSITIVE) {
@@ -588,16 +594,11 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         }
 
         if ($valid === true) {
+            $bigcode = $byte & 0b00011111;
 
-            if ($length === 2) {
-                $bigcode = $byte & 0b00011111;
-            }
-
-            elseif ($length === 3) {
+            if ($length === 3) {
                 $bigcode = $byte & 0b00001111;
-            }
-
-            elseif ($length === 4) {
+            } elseif ($length === 4) {
                 $bigcode = $byte & 0b00000111;
             }
 
@@ -651,7 +652,9 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
 
                 if ($prev <= 0b11110100) {
                     // prev is valid start byte, validate length to check this char
-                    if ($original < $offset + self::calcUtf8CharLength($prev)) {
+                    $length = self::calcUtf8CharLength($prev);
+
+                    if ($original < $offset + $length) {
                         return [$offset, $length, true, $byte];
                     }
                 }
@@ -686,11 +689,20 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return [$offset, 1, false, $byte];
     }
 
+    /**
+     * @param integer $byte
+     */
     protected static function calcUtf8CharLength($byte)
     {
-        if (~$byte & 0b00001000) return 4;
-        if (~$byte & 0b00010000) return 3;
-        if (~$byte & 0b00100000) return 2;
+        if (~$byte & 0b00001000) {
+            return 4;
+        }
+        if (~$byte & 0b00010000) {
+            return 3;
+        }
+        if (~$byte & 0b00100000) {
+            return 2;
+        }
         return 1;
     }
 }
