@@ -47,16 +47,6 @@ class StrObjSpec extends ObjectBehavior
         $this->length()->shouldBe(3);
     }
 
-    function it_can_charcodeat_utf8()
-    {
-        $this->beConstructedWith("AÕ", StrObj::UTF8);
-        $this->charCodeAt(0)[2]->shouldBe(65);
-
-        $this->charCodeAt(1)[0]->shouldBe(1);
-        $this->charCodeAt(1)[1]->shouldBe(2);
-        $this->charCodeAt(1)[2]->shouldBe(213);
-    }
-
     function it_can_compareto()
     {
         $this->beConstructedWith('hello9');

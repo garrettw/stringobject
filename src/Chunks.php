@@ -9,7 +9,7 @@ class Chunks implements \ArrayAccess, \Countable, \Iterator
     private $ending;
     private $index = 0;
 
-    public function __construct(StrObj $so, $length = 76, $ending = "\r\n")
+    public function __construct(StrObj $strobj, $length = 76, $ending = "\r\n")
     {
         $this->strobj = $so;
         $this->length = $length;
@@ -63,11 +63,11 @@ class Chunks implements \ArrayAccess, \Countable, \Iterator
 
     public function offsetSet($offset, $value)
     {
-        throw new \LogicException('Invalid assignment operation on StrObj adapter');
+        throw new \LogicException('Cannot assign '.$value.' to immutable StrObj adapter instance at index '.$offset);
     }
 
     public function offsetUnset($offset)
     {
-        throw new \LogicException('Invalid unset operation on StrObj adapter');
+        throw new \LogicException('Cannot unset index '.$offset.' on immutable StrObj adapter instance');
     }
 }

@@ -9,7 +9,7 @@ class Tokens implements \Iterator
     private $index = 0;
     private $curval;
 
-    public function __construct(StrObj $so, $delim)
+    public function __construct(StrObj $strobj, $delim)
     {
         $this->strobj = $so;
         $this->delim = $delim;

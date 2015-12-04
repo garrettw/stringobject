@@ -20,8 +20,6 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
     const META = 512;
     const LAZY = 1024;
     const GREEDY = 2048;
-    const WINDOWS1252 = 4096;
-    const UTF8 = 8192;
 
     // STATIC PROPERTIES
 
@@ -81,7 +79,7 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         'ya' => ['я'],
         'yu' => ['ю'],
         'zh' => ['ж'],
-        '(c]' => ['©'],
+        '(c)' => ['©'],
         'A' => ['Á', 'À', 'Ả', 'Ã', 'Ạ', 'Ă', 'Ắ', 'Ằ', 'Ẳ', 'Ẵ', 'Ặ', 'Â', 'Ấ',
                 'Ầ', 'Ẩ', 'Ẫ', 'Ậ', 'Å', 'Ā', 'Ą', 'Α', 'Ά', 'Ἀ', 'Ἁ', 'Ἂ', 'Ἃ',
                 'Ἄ', 'Ἅ', 'Ἆ', 'Ἇ', 'ᾈ', 'ᾉ', 'ᾊ', 'ᾋ', 'ᾌ', 'ᾍ', 'ᾎ', 'ᾏ', 'Ᾰ',
@@ -139,46 +137,16 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
                 "\xE2\x80\x87", "\xE2\x80\x88", "\xE2\x80\x89", "\xE2\x80\x8A",
                 "\xE2\x80\xAF", "\xE2\x81\x9F", "\xE3\x80\x80"],
     ];
-    protected static $winc1umap = [
-        128 => 0x20AC,
-        130 => 0x201A,
-        131 => 0x0192,
-        132 => 0x201E,
-        133 => 0x2026,
-        134 => 0x2020,
-        135 => 0x2021,
-        136 => 0x02C6,
-        137 => 0x2030,
-        138 => 0x0160,
-        139 => 0x2039,
-        140 => 0x0152,
-        142 => 0x017D,
-        145 => 0x2018,
-        146 => 0x2019,
-        147 => 0x201C,
-        148 => 0x201D,
-        149 => 0x2022,
-        150 => 0x2013,
-        151 => 0x2014,
-        152 => 0x02DC,
-        153 => 0x2122,
-        154 => 0x0161,
-        155 => 0x203A,
-        156 => 0x0153,
-        158 => 0x017E,
-        159 => 0x0178,
-    ];
 
     // PROPERTIES
 
     protected $raw;
-    protected $encoding;
     protected $token = false;
     protected $caret = 0;
 
     // MAGIC METHODS
 
-    public function __construct($thing, $enc = self::WINDOWS1252)
+    public function __construct($thing)
     {
         self::testStringableObject($thing);
 
@@ -187,7 +155,6 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         }
 
         $this->raw = (string) $thing;
-        $this->encoding = $enc;
     }
 
     /**
@@ -232,11 +199,7 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
      */
     public function charCodeAt($offset)
     {
-        if ($this->encoding === self::WINDOWS1252) {
-            return \ord($this->raw{$offset});
-        }
-
-        return $this->parseUtf8CharAt($offset);
+        return \ord($this->raw{$offset});
     }
 
     public function compareTo($str, $mode = self::NORMAL, $length = 1)
@@ -570,139 +533,5 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
                 'Parameter is an object that does not implement __toString() method'
             );
         }
-    }
-
-    protected function parseUtf8CharAt($offset)
-    {
-        list($start, $length, $valid, $current) = $this->findUtf8CharAt($offset);
-
-        if ($length === 1) {
-            if ($current > 0b01111111 && $current < 0b10100000) {
-                return [$start, $length, self::$winc1umap[$current]];
-            }
-            return [$start, $length, $current];
-        }
-
-        $byte = \ord($this->raw{$start});
-
-        if ($valid === false) {
-            if ($length === 2 && $byte & 0b11000000) {
-                // overlong ascii
-                return [$start + 1, 1, ($offset === $start) ? \ord($this->raw{$start + 1}) : $byte];
-            }
-            return [$offset, 1, $current];
-        }
-
-        if ($valid === true) {
-            $bigcode = $byte & 0b00011111;
-
-            if ($length === 3) {
-                $bigcode = $byte & 0b00001111;
-            } elseif ($length === 4) {
-                $bigcode = $byte & 0b00000111;
-            }
-
-            for ($next = 1; $next < $length; $next++) {
-                $bigcode <<= 6;
-                $bigcode += \ord($this->raw{$start + $next}) & 0b00111111;
-            }
-
-            if ($bigcode > 0x10FFFF) {
-                return [$offset, 1, $current];
-            }
-            return [$start, $length, $bigcode];
-        }
-    }
-
-    /**
-     * Determines if the byte at the given offset is part of a valid UTF8 char,
-     * and returns its actual starting offset, length in bytes, validity,
-     * and the byte at the original offset.
-     */
-    protected function findUtf8CharAt($offset)
-    {
-        $byte = \ord($this->raw{$offset});
-
-        if ($byte <= 0b01111111) {
-            // ASCII passthru, 1 byte long
-            return [$offset, 1, true, $byte];
-        }
-
-        if ($byte <= 0b10111111) {
-            // either part of a UTF8 char, or an invalid UTF8 codepoint.
-            // try to find start of UTF8 char
-            $original = $offset;
-            while ($offset > 0 && $original - $offset < 4) {
-                $prev = \ord($this->raw{--$offset});
-
-                if ($prev <= 0b01111111) {
-                    // prev is plain ASCII so current char can't be valid
-                    return [$original, 1, false, $byte];
-                }
-
-                if ($prev <= 0b10111111) {
-                    // prev is also part of a UTF8 char, so keep looking
-                    continue;
-                }
-
-                if ($prev == 0xC0 || $prev == 0xC1) {
-                    // prev is an invalid UTF8 starter for overlong ASCII
-                    return [$offset, 2, false, $byte];
-                }
-
-                if ($prev <= 0b11110100) {
-                    // prev is valid start byte, validate length to check this char
-                    $length = self::calcUtf8CharLength($prev);
-
-                    if ($original < $offset + $length) {
-                        return [$offset, $length, true, $byte];
-                    }
-                }
-                return [$original, 1, false, $byte];
-            }
-            return [$original, 1, false, $byte];
-        }
-
-        if ($byte <= 0b11110100) {
-            // valid UTF8 start byte, find the rest, determine if length is valid
-            $actual = $length = self::calcUtf8CharLength($byte);
-
-            for ($i = 1; $i < $length; $i++) {
-                if ($offset + $i >= $this->length()) {
-                    $actual = $i - 1;
-                    break;
-                }
-                $last = \ord($this->raw{$offset + $i});
-                if ($last < 0b10000000 || $last > 0b10111111) {
-                    $actual = $i;
-                    break;
-                }
-            }
-
-            if ($actual !== $length) {
-                return [$offset, $actual, false, $byte];
-            }
-            return [$offset, $length, true, $byte];
-        }
-
-        // if 245 to 255, Windows-1252 passthru
-        return [$offset, 1, false, $byte];
-    }
-
-    /**
-     * @param integer $byte
-     */
-    protected static function calcUtf8CharLength($byte)
-    {
-        if (~$byte & 0b00001000) {
-            return 4;
-        }
-        if (~$byte & 0b00010000) {
-            return 3;
-        }
-        if (~$byte & 0b00100000) {
-            return 2;
-        }
-        return 1;
     }
 }
