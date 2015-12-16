@@ -11,7 +11,7 @@ class Tokens implements \Iterator
 
     public function __construct(StrObj $strobj, $delim)
     {
-        $this->strobj = $so;
+        $this->strobj = $strobj;
         $this->delim = $delim;
     }
 

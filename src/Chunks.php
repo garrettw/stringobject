@@ -11,7 +11,7 @@ class Chunks implements \ArrayAccess, \Countable, \Iterator
 
     public function __construct(StrObj $strobj, $length = 76, $ending = "\r\n")
     {
-        $this->strobj = $so;
+        $this->strobj = $strobj;
         $this->length = $length;
         $this->ending = $ending;
     }
