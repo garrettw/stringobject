@@ -70,12 +70,18 @@ class UStrObj extends StrObj
         return \explode($delim, $this->raw, $limit);
     }
 
+    /**
+     * @return string
+     */
     public function charAt($index)
     {
         $this->loadToArray();
         return $this->chars[$index][0];
     }
 
+    /**
+     * @return int
+     */
     public function charCodeAt($index)
     {
         $this->loadToArray();
@@ -170,7 +176,6 @@ class UStrObj extends StrObj
             return \chr($cpt);
         }
 
-        $data = [];
         if ($cpt < 0x800) {
             $data = [
                 0b11000000 | ($cpt >> 6),
