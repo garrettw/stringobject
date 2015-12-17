@@ -91,10 +91,6 @@ class UStrObj extends StrObj
         $len = \strlen($this->raw);
         $inside = false;
         $invalid = false;
-        $cache = '';
-        $ordcache = 0;
-        $originOffset = 0;
-        $bytes = 0;
 
         for ($offset = 0; $offset < $len; $offset++) {
             $char = $this->raw{$offset};
@@ -145,7 +141,6 @@ class UStrObj extends StrObj
                 $toobig = ($ordcache > 0x10FFFF);
 
                 if ($overlong || $surrogate || $toobig) {
-                    $inside = false;
                     $invalid = true;
                     $offset = $originOffset - 1;
                     continue;
@@ -162,11 +157,6 @@ class UStrObj extends StrObj
 
                 // verification passed, now store it
                 $this->chars[] = [$cache, $ordcache];
-                // then clear out the temp vars for the next sequence
-                $inside = false;
-                $invalid = false;
-                $cache = '';
-                $ordcache = 0;
             }
         }
     }
