@@ -1,6 +1,8 @@
 <?php
 
-namespace StringObject;
+namespace StringObject\Decorator;
+
+use StringObject\StrObj;
 
 class HTMLStrObj extends TextStrObj
 {

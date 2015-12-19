@@ -4,8 +4,15 @@ namespace StringObject;
 
 class UStrObj extends StrObj
 {
+    const NOT_NORMALIZED = 0;
+    const NFC = 1;
+    const NFD = 2;
+    const NFKC = 5;
+    const NFKD = 6;
+
     protected $chars = [];
     protected $uhandler;
+    protected $normform;
 
     protected static $spec = [
         2 => ['datamask' => 0b00011111, 'threshold' => 0x80],
@@ -49,8 +56,9 @@ class UStrObj extends StrObj
         0x9F => 0x0178,
     ];
 
-    public function __construct($thing)
+    public function __construct($thing, $normform = self::NOT_NORMALIZED)
     {
+        $this->normform = $normform;
         parent::__construct($thing);
     }
 
