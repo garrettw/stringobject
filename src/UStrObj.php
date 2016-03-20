@@ -104,15 +104,15 @@ class UStrObj extends AnyStrObj
             return '';
         }
 
-        $invalid = [0xEF, 0xBF, 0xBD]; // U+FFFD
+        if (($cpt >= 0xD800 && $cpt <= 0xDFFF) || $cpt > 0x10FFFF) {
+            return "\xEF\xBF\xBD"; // U+FFFD; invalid symbol
+        }
 
         if ($cpt < self::$spec[3]['start']) {
             $data = [
                 0b11000000 | ($cpt >> 6),
                 0b10000000 | ($cpt & 0b00111111)
             ];
-        } elseif ($cpt >= 0xD800 && $cpt <= 0xDFFF) {
-            $data = $invalid;
         } elseif ($cpt < self::$spec[4]['start']) {
             $data = [
                 0b11100000 | ($cpt >> 12),
@@ -126,8 +126,6 @@ class UStrObj extends AnyStrObj
                 0b10000000 | (($cpt >> 6) & 0b00111111),
                 0b10000000 | ($cpt & 0b00111111),
             ];
-        } else {
-            $data = $invalid;
         }
 
         return implode(array_map('chr', $data));
@@ -233,5 +231,4 @@ class UStrObj extends AnyStrObj
             }
         }
     }
-
 }

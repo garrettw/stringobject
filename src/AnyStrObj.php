@@ -28,46 +28,34 @@ abstract class AnyStrObj
         return $this->raw;
     }
 
-    public abstract function compareTo($str, $mode = self::NORMAL, $length = 1);
+    abstract public function compareTo($str, $mode = self::NORMAL, $length = 1);
 
-    public function asciify($removeUnsupported = true)
-    {
-        $str = $this->raw;
-        foreach (self::$asciimap as $key => $value) {
-            $str = \str_replace($value, $key, $str);
-        }
-        if ($removeUnsupported) {
-            $str = \preg_replace('/[^\x20-\x7E]/u', '', $str);
-        }
-        return new self($str);
-    }
+    abstract public function escape($mode = self::NORMAL, $charlist = '');
 
-    public abstract function escape($mode = self::NORMAL, $charlist = '');
+    abstract public function nextToken($delim);
 
-    public abstract function nextToken($delim);
+    abstract public function remove($str, $mode = self::NORMAL);
 
-    public abstract function remove($str, $mode = self::NORMAL);
-
-    public abstract function repeat($times);
+    abstract public function repeat($times);
 
     /**
      * @param string $replace
      */
-    public abstract function replace($search, $replace, $mode = self::NORMAL);
+    abstract public function replace($search, $replace, $mode = self::NORMAL);
 
-    public abstract function resetToken();
+    abstract public function resetToken();
 
-    public abstract function times($times);
+    abstract public function times($times);
 
-    public abstract function translate($search, $replace = '');
+    abstract public function translate($search, $replace = '');
 
-    public abstract function trim($mask = " \t\n\r\0\x0B", $mode = self::BOTH_ENDS);
+    abstract public function trim($mask = " \t\n\r\0\x0B", $mode = self::BOTH_ENDS);
 
-    public abstract function unescape($mode = self::NORMAL);
+    abstract public function unescape($mode = self::NORMAL);
 
-    public abstract function uuDecode();
+    abstract public function uuDecode();
 
-    public abstract function uuEncode();
+    abstract public function uuEncode();
 
     public function equals($str)
     {
@@ -77,9 +65,9 @@ abstract class AnyStrObj
         return ($str == $this->raw);
     }
 
-    public abstract function isAscii();
+    abstract public function isAscii();
 
-    public abstract function isEmpty();
+    abstract public function isEmpty();
 
     protected static function testStringableObject($thing)
     {

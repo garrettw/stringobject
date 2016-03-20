@@ -153,7 +153,7 @@ class ASCII
     public static function convertPure(AnyStrObj $strobj)
     {
         $asciiobj = self::convert($strobj);
-        $str = \preg_replace('/[^\x20-\x7E]/u', '', $asciiobj->raw);
+        $str = \preg_replace('/[^\x20-\x7E]/u', '', $asciiobj->__toString());
         return self::duplicate($strobj, $str);
     }
 

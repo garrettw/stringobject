@@ -65,7 +65,8 @@ class Chunks implements \ArrayAccess, \Countable, \Iterator
 
     public function offsetSet($offset, $value)
     {
-        throw new \LogicException('Cannot assign ' . $value . ' to immutable StrObj adapter instance at index ' . $offset);
+        throw new \LogicException('Cannot assign ' . $value
+            .' to immutable StrObj adapter instance at index ' . $offset);
     }
 
     public function offsetUnset($offset)
