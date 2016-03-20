@@ -79,12 +79,6 @@ class StrObjSpec extends ObjectBehavior
         $this->append('two')->raw->shouldBe('onetwo');
     }
 
-    function it_can_asciify()
-    {
-        $this->beConstructedWith('πἳ');
-        $this->asciify()->raw->shouldBe('pi');
-    }
-
     function it_can_chunk()
     {
         $this->beConstructedWith('1234');

@@ -2,24 +2,25 @@
 
 namespace StringObject;
 
-class UStrObj extends StrObj
+class UStrObj extends AnyStrObj
 {
     const NOT_NORMALIZED = 0;
     const NFC = 1;
     const NFD = 2;
+    const NFK = 4;
     const NFKC = 5;
     const NFKD = 6;
 
     protected $chars = [];
     protected $uhandler;
-    protected $normform;
+    protected $normform = self::NOT_NORMALIZED;
 
     protected static $spec = [
-        2 => ['datamask' => 0b00011111, 'threshold' => 0x80],
-        3 => ['datamask' => 0b00001111, 'threshold' => 0x800],
-        4 => ['datamask' => 0b00000111, 'threshold' => 0x10000],
-        5 => ['datamask' => 0b00000011, 'threshold' => 0x200000],
-        6 => ['datamask' => 0b00000001, 'threshold' => 0x4000000],
+        2 => ['mask' => 0b00011111, 'start' => 0x80],
+        3 => ['mask' => 0b00001111, 'start' => 0x800],
+        4 => ['mask' => 0b00000111, 'start' => 0x10000],
+        5 => ['mask' => 0b00000011, 'start' => 0x200000],
+        6 => ['mask' => 0b00000001, 'start' => 0x4000000],
     ];
     protected static $winc1umap = [
         0x80 => 0x20AC,
@@ -56,12 +57,6 @@ class UStrObj extends StrObj
         0x9F => 0x0178,
     ];
 
-    public function __construct($thing, $normform = self::NOT_NORMALIZED)
-    {
-        $this->normform = $normform;
-        parent::__construct($thing);
-    }
-
     public function toArray($delim = '', $limit = null)
     {
         $this->loadToArray();
@@ -96,6 +91,70 @@ class UStrObj extends StrObj
         return $this->chars[$index][1];
     }
 
+    /**
+     *
+     */
+    protected static function cpToUtf8Char($cpt)
+    {
+        if ($cpt < self::$spec[2]['start']) {
+            return \chr($cpt);
+        }
+
+        if ($cpt == 0xFEFF) {
+            return '';
+        }
+
+        $invalid = [0xEF, 0xBF, 0xBD]; // U+FFFD
+
+        if ($cpt < self::$spec[3]['start']) {
+            $data = [
+                0b11000000 | ($cpt >> 6),
+                0b10000000 | ($cpt & 0b00111111)
+            ];
+        } elseif ($cpt >= 0xD800 && $cpt <= 0xDFFF) {
+            $data = $invalid;
+        } elseif ($cpt < self::$spec[4]['start']) {
+            $data = [
+                0b11100000 | ($cpt >> 12),
+                0b10000000 | (($cpt >> 6) & 0b00111111),
+                0b10000000 | ($cpt & 0b00111111),
+            ];
+        } elseif ($cpt <= 0x10FFFF) {
+            $data = [
+                0b11110100,
+                0b10000000 | (($cpt >> 12) & 0b00111111),
+                0b10000000 | (($cpt >> 6) & 0b00111111),
+                0b10000000 | ($cpt & 0b00111111),
+            ];
+        } else {
+            $data = $invalid;
+        }
+
+        return implode(array_map('chr', $data));
+    }
+    /**
+     * @param integer $byte
+     */
+    protected static function charLength($byte)
+    {
+        if (($byte & 0b11111110) === 0b11111100) {
+            return 6;
+        }
+        if (($byte & 0b11111100) === 0b11111000) {
+            return 5;
+        }
+        if (($byte & 0b11111000) === 0b11110000) {
+            return 4;
+        }
+        if (($byte & 0b11110000) === 0b11100000) {
+            return 3;
+        }
+        if (($byte & 0b11100000) === 0b11000000) {
+            return 2;
+        }
+        return 1;
+    }
+
     private function loadToArray()
     {
         if (!empty($this->chars)) {
@@ -103,7 +162,7 @@ class UStrObj extends StrObj
         }
 
         $len = \strlen($this->raw);
-        $inside = false;
+        $inside = false; // are we "inside" of evaluating a valid UTF-8 char?
         $invalid = false;
 
         for ($offset = 0; $offset < $len; $offset++) {
@@ -117,9 +176,9 @@ class UStrObj extends StrObj
                     // valid UTF-8 multibyte start
                     $inside = true;
                     $cache = $char;
-                    $ordcache = ($ord & self::$spec[$bytes]['datamask']) << (6 * ($bytes - 1));
+                    $ordcache = ($ord & self::$spec[$bytes]['mask']) << (6 * ($bytes - 1));
                     $originOffset = $offset;
-                } elseif ($ord < 0x80) {
+                } elseif ($ord < self::$spec[2]['start']) {
                     // ASCII 7-bit char
                     $this->chars[] = [$char, $ord];
                 } else {
@@ -150,7 +209,7 @@ class UStrObj extends StrObj
                 $inside = false;
 
                 // check for overlong, surrogate, too large, BOM, or C0/C1
-                $overlong = ($ordcache < self::$spec[$bytes]['threshold']);
+                $overlong = ($ordcache < self::$spec[$bytes]['start']);
                 $surrogate = ($ordcache & 0xFFFFF800 === 0xD800);
                 $toobig = ($ordcache > 0x10FFFF);
 
@@ -175,59 +234,4 @@ class UStrObj extends StrObj
         }
     }
 
-    /**
-     *
-     */
-    protected static function cpToUtf8Char($cpt)
-    {
-        if ($cpt < 0x80) {
-            return \chr($cpt);
-        }
-
-        if ($cpt < 0x800) {
-            $data = [
-                0b11000000 | ($cpt >> 6),
-                0b10000000 | ($cpt & 0b00111111)
-            ];
-        } elseif ($cpt < 0x10000) {
-            $data = [
-                0b11100000 | ($cpt >> 12),
-                0b10000000 | (($cpt >> 6) & 0b00111111),
-                0b10000000 | ($cpt & 0b00111111),
-            ];
-        } elseif ($cpt < 0x10FFFF) {
-            $data = [
-                0b11110100,
-                0b10000000 | (($cpt >> 12) & 0b00111111),
-                0b10000000 | (($cpt >> 6) & 0b00111111),
-                0b10000000 | ($cpt & 0b00111111),
-            ];
-        } else {
-            $data = [0xEF, 0xBF, 0xBD]; // U+FFFD
-        }
-
-        return implode(array_map('chr', $data));
-    }
-    /**
-     * @param integer $byte
-     */
-    protected static function charLength($byte)
-    {
-        if (($byte & 0b11111110) === 0b11111100) {
-            return 6;
-        }
-        if (($byte & 0b11111100) === 0b11111000) {
-            return 5;
-        }
-        if (($byte & 0b11111000) === 0b11110000) {
-            return 4;
-        }
-        if (($byte & 0b11110000) === 0b11100000) {
-            return 3;
-        }
-        if (($byte & 0b11100000) === 0b11000000) {
-            return 2;
-        }
-        return 1;
-    }
 }

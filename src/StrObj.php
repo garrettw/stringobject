@@ -2,7 +2,7 @@
 
 namespace StringObject;
 
-class StrObj implements \ArrayAccess, \Countable, \Iterator
+class StrObj extends AnyStrObj implements \ArrayAccess, \Countable, \Iterator
 {
     // CONSTANTS
 
@@ -21,123 +21,6 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
     const LAZY = 1024;
     const GREEDY = 2048;
 
-    // STATIC PROPERTIES
-
-    protected static $asciimap = [
-        'a' => ['à', 'á', 'ả', 'ã', 'ạ', 'ă', 'ắ', 'ằ', 'ẳ', 'ẵ', 'ặ', 'â', 'ấ',
-                'ầ', 'ẩ', 'ẫ', 'ậ', 'ā', 'ą', 'å', 'α', 'ά', 'ἀ', 'ἁ', 'ἂ', 'ἃ',
-                'ἄ', 'ἅ', 'ἆ', 'ἇ', 'ᾀ', 'ᾁ', 'ᾂ', 'ᾃ', 'ᾄ', 'ᾅ', 'ᾆ', 'ᾇ', 'ὰ',
-                'ά', 'ᾰ', 'ᾱ', 'ᾲ', 'ᾳ', 'ᾴ', 'ᾶ', 'ᾷ', 'а', 'أ'],
-        'b' => ['б', 'β', 'Ъ', 'Ь', 'ب'],
-        'c' => ['ç', 'ć', 'č', 'ĉ', 'ċ'],
-        'd' => ['ď', 'ð', 'đ', 'ƌ', 'ȡ', 'ɖ', 'ɗ', 'ᵭ', 'ᶁ', 'ᶑ', 'д', 'δ', 'د', 'ض'],
-        'e' => ['é', 'è', 'ẻ', 'ẽ', 'ẹ', 'ê', 'ế', 'ề', 'ể', 'ễ', 'ệ', 'ë', 'ē',
-                'ę', 'ě', 'ĕ', 'ė', 'ε', 'έ', 'ἐ', 'ἑ', 'ἒ', 'ἓ', 'ἔ', 'ἕ', 'ὲ',
-                'έ', 'е', 'ё', 'э', 'є', 'ə'],
-        'f' => ['ф', 'φ', 'ف'],
-        'g' => ['ĝ', 'ğ', 'ġ', 'ģ', 'г', 'ґ', 'γ', 'ج'],
-        'h' => ['ĥ', 'ħ', 'η', 'ή', 'ح', 'ه'],
-        'i' => ['í', 'ì', 'ỉ', 'ĩ', 'ị', 'î', 'ï', 'ī', 'ĭ', 'į', 'ı', 'ι', 'ί',
-                'ϊ', 'ΐ', 'ἰ', 'ἱ', 'ἲ', 'ἳ', 'ἴ', 'ἵ', 'ἶ', 'ἷ', 'ὶ', 'ί', 'ῐ',
-                'ῑ', 'ῒ', 'ΐ', 'ῖ', 'ῗ', 'і', 'ї', 'и'],
-        'j' => ['ĵ', 'ј', 'Ј'],
-        'k' => ['ķ', 'ĸ', 'к', 'κ', 'Ķ', 'ق', 'ك'],
-        'l' => ['ł', 'ľ', 'ĺ', 'ļ', 'ŀ', 'л', 'λ', 'ل'],
-        'm' => ['м', 'μ', 'م'],
-        'n' => ['ñ', 'ń', 'ň', 'ņ', 'ŉ', 'ŋ', 'ν', 'н', 'ن'],
-        'o' => ['ó', 'ò', 'ỏ', 'õ', 'ọ', 'ô', 'ố', 'ồ', 'ổ', 'ỗ', 'ộ', 'ơ', 'ớ',
-                'ờ', 'ở', 'ỡ', 'ợ', 'ø', 'ō', 'ő', 'ŏ', 'ο', 'ὀ', 'ὁ', 'ὂ', 'ὃ',
-                'ὄ', 'ὅ', 'ὸ', 'ό', 'о', 'و', 'θ'],
-        'p' => ['п', 'π'],
-        'r' => ['ŕ', 'ř', 'ŗ', 'р', 'ρ', 'ر'],
-        's' => ['ś', 'š', 'ş', 'с', 'σ', 'ș', 'ς', 'س', 'ص'],
-        't' => ['ť', 'ţ', 'т', 'τ', 'ț', 'ت', 'ط'],
-        'u' => ['ú', 'ù', 'ủ', 'ũ', 'ụ', 'ư', 'ứ', 'ừ', 'ử', 'ữ', 'ự', 'û', 'ū',
-                'ů', 'ű', 'ŭ', 'ų', 'µ', 'у'],
-        'v' => ['в'],
-        'w' => ['ŵ', 'ω', 'ώ'],
-        'x' => ['χ'],
-        'y' => ['ý', 'ỳ', 'ỷ', 'ỹ', 'ỵ', 'ÿ', 'ŷ', 'й', 'ы', 'υ', 'ϋ', 'ύ', 'ΰ', 'ي'],
-        'z' => ['ź', 'ž', 'ż', 'з', 'ζ', 'ز'],
-        'aa' => ['ع'],
-        'ae' => ['ä', 'æ'],
-        'ch' => ['ч'],
-        'dj' => ['ђ', 'đ'],
-        'dz' => ['џ'],
-        'gh' => ['غ'],
-        'kh' => ['х', 'خ'],
-        'lj' => ['љ'],
-        'nj' => ['њ'],
-        'oe' => ['ö', 'œ'],
-        'ps' => ['ψ'],
-        'sh' => ['ш'],
-        'shch' => ['щ'],
-        'ss' => ['ß'],
-        'th' => ['þ', 'ث', 'ذ', 'ظ'],
-        'ts' => ['ц'],
-        'ue' => ['ü'],
-        'ya' => ['я'],
-        'yu' => ['ю'],
-        'zh' => ['ж'],
-        '(c)' => ['©'],
-        'A' => ['Á', 'À', 'Ả', 'Ã', 'Ạ', 'Ă', 'Ắ', 'Ằ', 'Ẳ', 'Ẵ', 'Ặ', 'Â', 'Ấ',
-                'Ầ', 'Ẩ', 'Ẫ', 'Ậ', 'Å', 'Ā', 'Ą', 'Α', 'Ά', 'Ἀ', 'Ἁ', 'Ἂ', 'Ἃ',
-                'Ἄ', 'Ἅ', 'Ἆ', 'Ἇ', 'ᾈ', 'ᾉ', 'ᾊ', 'ᾋ', 'ᾌ', 'ᾍ', 'ᾎ', 'ᾏ', 'Ᾰ',
-                'Ᾱ', 'Ὰ', 'Ά', 'ᾼ', 'А'],
-        'B' => ['Б', 'Β'],
-        'C' => ['Ç', 'Ć', 'Č', 'Ĉ', 'Ċ'],
-        'D' => ['Ď', 'Ð', 'Đ', 'Ɖ', 'Ɗ', 'Ƌ', 'ᴅ', 'ᴆ', 'Д', 'Δ'],
-        'E' => ['É', 'È', 'Ẻ', 'Ẽ', 'Ẹ', 'Ê', 'Ế', 'Ề', 'Ể', 'Ễ', 'Ệ', 'Ë', 'Ē',
-                'Ę', 'Ě', 'Ĕ', 'Ė', 'Ε', 'Έ', 'Ἐ', 'Ἑ', 'Ἒ', 'Ἓ', 'Ἔ', 'Ἕ', 'Έ',
-                'Ὲ', 'Е', 'Ё', 'Э', 'Є', 'Ə'],
-        'F' => ['Ф', 'Φ'],
-        'G' => ['Ğ', 'Ġ', 'Ģ', 'Г', 'Ґ', 'Γ'],
-        'H' => ['Η', 'Ή'],
-        'I' => ['Í', 'Ì', 'Ỉ', 'Ĩ', 'Ị', 'Î', 'Ï', 'Ī', 'Ĭ', 'Į', 'İ', 'Ι', 'Ί',
-                'Ϊ', 'Ἰ', 'Ἱ', 'Ἳ', 'Ἴ', 'Ἵ', 'Ἶ', 'Ἷ', 'Ῐ', 'Ῑ', 'Ὶ', 'Ί', 'И',
-                'І', 'Ї'],
-        'K' => ['К', 'Κ'],
-        'L' => ['Ĺ', 'Ł', 'Л', 'Λ', 'Ļ'],
-        'M' => ['М', 'Μ'],
-        'N' => ['Ń', 'Ñ', 'Ň', 'Ņ', 'Ŋ', 'Н', 'Ν'],
-        'O' => ['Ó', 'Ò', 'Ỏ', 'Õ', 'Ọ', 'Ô', 'Ố', 'Ồ', 'Ổ', 'Ỗ', 'Ộ', 'Ơ', 'Ớ',
-                'Ờ', 'Ở', 'Ỡ', 'Ợ', 'Ø', 'Ō', 'Ő', 'Ŏ', 'Ο', 'Ό', 'Ὀ', 'Ὁ', 'Ὂ',
-                'Ὃ', 'Ὄ', 'Ὅ', 'Ὸ', 'Ό', 'О', 'Θ', 'Ө'],
-        'P' => ['П', 'Π'],
-        'R' => ['Ř', 'Ŕ', 'Р', 'Ρ'],
-        'S' => ['Ş', 'Ŝ', 'Ș', 'Š', 'Ś', 'С', 'Σ'],
-        'T' => ['Ť', 'Ţ', 'Ŧ', 'Ț', 'Т', 'Τ'],
-        'U' => ['Ú', 'Ù', 'Ủ', 'Ũ', 'Ụ', 'Ư', 'Ứ', 'Ừ', 'Ử', 'Ữ', 'Ự', 'Û', 'Ū',
-                'Ů', 'Ű', 'Ŭ', 'Ų', 'У'],
-        'V' => ['В'],
-        'W' => ['Ω', 'Ώ'],
-        'X' => ['Χ'],
-        'Y' => ['Ý', 'Ỳ', 'Ỷ', 'Ỹ', 'Ỵ', 'Ÿ', 'Ῠ', 'Ῡ', 'Ὺ', 'Ύ', 'Ы', 'Й', 'Υ', 'Ϋ'],
-        'Z' => ['Ź', 'Ž', 'Ż', 'З', 'Ζ'],
-        'AE' => ['Ä', 'Æ'],
-        'CH' => ['Ч'],
-        'DJ' => ['Ђ'],
-        'DZ' => ['Џ'],
-        'KH' => ['Х'],
-        'LJ' => ['Љ'],
-        'NJ' => ['Њ'],
-        'OE' => ['Ö'],
-        'PS' => ['Ψ'],
-        'SH' => ['Ш'],
-        'SHCH' => ['Щ'],
-        'SS' => ['ẞ'],
-        'TH' => ['Þ'],
-        'TS' => ['Ц'],
-        'UE' => ['Ü'],
-        'YA' => ['Я'],
-        'YU' => ['Ю'],
-        'ZH' => ['Ж'],
-        ' ' => ["\xC2\xA0", "\xE2\x80\x80", "\xE2\x80\x81", "\xE2\x80\x82",
-                "\xE2\x80\x83", "\xE2\x80\x84", "\xE2\x80\x85", "\xE2\x80\x86",
-                "\xE2\x80\x87", "\xE2\x80\x88", "\xE2\x80\x89", "\xE2\x80\x8A",
-                "\xE2\x80\xAF", "\xE2\x81\x9F", "\xE3\x80\x80"],
-    ];
-
     // PROPERTIES
 
     protected $raw;
@@ -145,17 +28,6 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
     protected $caret = 0;
 
     // MAGIC METHODS
-
-    public function __construct($thing)
-    {
-        self::testStringableObject($thing);
-
-        if (\is_array($thing)) {
-            throw new \InvalidArgumentException('Unsure of how to convert array to string');
-        }
-
-        $this->raw = (string) $thing;
-    }
 
     /**
      * @return mixed
@@ -202,9 +74,9 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return \ord($this->raw{$offset});
     }
 
-    public function compareTo($str, $mode = self::NORMAL, $length = 1)
+    public function compareTo($str, $flags = self::NORMAL, $length = 1)
     {
-        $modemap = [
+        $flagsmap = [
             self::NORMAL => 'strcmp',
             self::CASE_INSENSITIVE => 'strcasecmp',
             self::CURRENT_LOCALE => 'strcoll',
@@ -214,24 +86,24 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
             (self::FIRST_N | self::CASE_INSENSITIVE) => 'strncasecmp',
         ];
 
-        if ($mode & self::FIRST_N) {
-            return \call_user_func($modemap[$mode], $this->raw, $str, $length);
+        if ($flags & self::FIRST_N) {
+            return \call_user_func($flagsmap[$flags], $this->raw, $str, $length);
         }
-        return \call_user_func($modemap[$mode], $this->raw, $str);
+        return \call_user_func($flagsmap[$flags], $this->raw, $str);
     }
 
-    public function indexOf($needle, $offset = 0, $mode = self::NORMAL)
+    public function indexOf($needle, $offset = 0, $flags = self::NORMAL)
     {
         // strip out bits we don't understand
-        $mode &= (self::REVERSE | self::CASE_INSENSITIVE);
+        $flags &= (self::REVERSE | self::CASE_INSENSITIVE);
 
-        $modemap = [
+        $flagsmap = [
             self::NORMAL => 'strpos',
             self::CASE_INSENSITIVE => 'stripos',
             self::REVERSE => 'strrpos',
             (self::REVERSE | self::CASE_INSENSITIVE) => 'strripos',
         ];
-        return \call_user_func($modemap[$mode], $this->raw, $needle, $offset);
+        return \call_user_func($flagsmap[$flags], $this->raw, $needle, $offset);
     }
 
     public function length()
@@ -246,18 +118,6 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return new self($this->raw . $str);
     }
 
-    public function asciify($removeUnsupported = true)
-    {
-        $str = $this->raw;
-        foreach (self::$asciimap as $key => $value) {
-            $str = \str_replace($value, $key, $str);
-        }
-        if ($removeUnsupported) {
-            $str = \preg_replace('/[^\x20-\x7E]/u', '', $str);
-        }
-        return new self($str);
-    }
-
     public function chunk($length = 76, $ending = "\r\n")
     {
         return new self(\chunk_split($this->raw, $length, $ending));
@@ -268,17 +128,17 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return $this->append($str);
     }
 
-    public function escape($mode = self::NORMAL, $charlist = '')
+    public function escape($flags = self::NORMAL, $charlist = '')
     {
-        $modemap = [
+        $flagsmap = [
             self::NORMAL => 'addslashes',
             self::C_STYLE => 'addcslashes',
             self::META => 'quotemeta',
         ];
-        if ($mode === self::C_STYLE) {
-            return new self(\call_user_func($modemap[$mode], $this->raw, $charlist));
+        if ($flags === self::C_STYLE) {
+            return new self(\call_user_func($flagsmap[$flags], $this->raw, $charlist));
         }
-        return new self(\call_user_func($modemap[$mode], $this->raw));
+        return new self(\call_user_func($flagsmap[$flags], $this->raw));
     }
 
     public function insertAt($str, $offset)
@@ -295,9 +155,9 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return new self(\strtok($this->raw, $delim));
     }
 
-    public function pad($newlength, $padding = ' ', $mode = self::END)
+    public function pad($newlength, $padding = ' ', $flags = self::END)
     {
-        return new self(\str_pad($this->raw, $newlength, $padding, $mode));
+        return new self(\str_pad($this->raw, $newlength, $padding, $flags));
     }
 
     public function prepend($str)
@@ -305,9 +165,9 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return new self($str . $this->raw);
     }
 
-    public function remove($str, $mode = self::NORMAL)
+    public function remove($str, $flags = self::NORMAL)
     {
-        return $this->replace($str, '', $mode);
+        return $this->replace($str, '', $flags);
     }
 
     public function removeSubstr($start, $length = null)
@@ -323,9 +183,9 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
     /**
      * @param string $replace
      */
-    public function replace($search, $replace, $mode = self::NORMAL)
+    public function replace($search, $replace, $flags = self::NORMAL)
     {
-        if ($mode & self::CASE_INSENSITIVE) {
+        if ($flags & self::CASE_INSENSITIVE) {
             return new self(\str_ireplace($search, $replace, $this->raw));
         }
         return new self(\str_replace($search, $replace, $this->raw));
@@ -375,24 +235,24 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return new self(\strtr($this->raw, $search, $replace));
     }
 
-    public function trim($mask = " \t\n\r\0\x0B", $mode = self::BOTH_ENDS)
+    public function trim($mask = " \t\n\r\0\x0B", $flags = self::BOTH_ENDS)
     {
-        $modemap = [
+        $flagsmap = [
             self::START => 'ltrim',
             self::END => 'rtrim',
             self::BOTH_ENDS => 'trim',
         ];
-        return new self(\call_user_func($modemap[$mode], $this->raw, $mask));
+        return new self(\call_user_func($flagsmap[$flags], $this->raw, $mask));
     }
 
-    public function unescape($mode = self::NORMAL)
+    public function unescape($flags = self::NORMAL)
     {
-        $modemap = [
+        $flagsmap = [
             self::NORMAL => 'stripslashes',
             self::C_STYLE => 'stripcslashes',
             self::META => 'stripslashes',
         ];
-        return new self(\call_user_func($modemap[$mode], $this->raw));
+        return new self(\call_user_func($flagsmap[$flags], $this->raw));
     }
 
     public function uuDecode()
@@ -417,12 +277,12 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
 
     // TESTING METHODS
 
-    public function contains($needle, $offset = 0, $mode = self::NORMAL)
+    public function contains($needle, $offset = 0, $flags = self::NORMAL)
     {
-        if ($mode & self::EXACT_POSITION) {
-            return ($this->indexOf($needle, $offset, $mode) === $offset);
+        if ($flags & self::EXACT_POSITION) {
+            return ($this->indexOf($needle, $offset, $flags) === $offset);
         }
-        return ($this->indexOf($needle, $offset, $mode) !== false);
+        return ($this->indexOf($needle, $offset, $flags) !== false);
     }
 
     public function countSubstr($needle, $offset = 0, $length = null)
@@ -433,11 +293,11 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return \substr_count($this->raw, $needle, $offset, $length);
     }
 
-    public function endsWith($str, $mode = self::NORMAL)
+    public function endsWith($str, $flags = self::NORMAL)
     {
-        $mode &= self::CASE_INSENSITIVE;
+        $flags &= self::CASE_INSENSITIVE;
         $offset = $this->length() - \strlen($str);
-        return $this->contains($str, $offset, $mode | self::EXACT_POSITION | self::REVERSE);
+        return $this->contains($str, $offset, $flags | self::EXACT_POSITION | self::REVERSE);
     }
 
     public function equals($str)
@@ -465,10 +325,10 @@ class StrObj implements \ArrayAccess, \Countable, \Iterator
         return empty($this->raw);
     }
 
-    public function startsWith($str, $mode = self::NORMAL)
+    public function startsWith($str, $flags = self::NORMAL)
     {
-        $mode &= self::CASE_INSENSITIVE;
-        return $this->contains($str, 0, $mode | self::EXACT_POSITION);
+        $flags &= self::CASE_INSENSITIVE;
+        return $this->contains($str, 0, $flags | self::EXACT_POSITION);
     }
 
     // INTERFACE IMPLEMENTATION METHODS
