@@ -59,7 +59,7 @@ class UString extends AnyString
 
     public function toArray($delim = '', $limit = null)
     {
-        $this->loadToArray();
+        $this->parse();
 
         if (empty($delim)) {
             return $this->chars;
@@ -78,7 +78,7 @@ class UString extends AnyString
      */
     public function charAt($index)
     {
-        $this->loadToArray();
+        $this->parse();
         return $this->chars[$index][0];
     }
 
@@ -87,8 +87,18 @@ class UString extends AnyString
      */
     public function charCodeAt($index)
     {
-        $this->loadToArray();
+        $this->parse();
         return $this->chars[$index][1];
+    }
+
+    public function detectForm()
+    {
+
+    }
+
+    public function normalize()
+    {
+
     }
 
     /**
@@ -153,7 +163,7 @@ class UString extends AnyString
         return 1;
     }
 
-    private function loadToArray()
+    private function parse()
     {
         if (!empty($this->chars)) {
             return;

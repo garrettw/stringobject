@@ -6,20 +6,20 @@ class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
 {
     // CONSTANTS
 
-    const NORMAL = 0;
     const START = 0;
     const END = 1;
     const BOTH_ENDS = 2;
-    const CASE_INSENSITIVE = 4;
-    const REVERSE = 8;
-    const EXACT_POSITION = 16;
-    const CURRENT_LOCALE = 32;
-    const NATURAL_ORDER = 64;
-    const FIRST_N = 128;
-    const C_STYLE = 256;
-    const META = 512;
-    const LAZY = 1024;
-    const GREEDY = 2048;
+    const NORMAL = 0;
+    const CASE_INSENSITIVE = 1;
+    const REVERSE = 2;
+    const EXACT_POSITION = 4;
+    const CURRENT_LOCALE = 2;
+    const NATURAL_ORDER = 4;
+    const FIRST_N = 8;
+    const C_STYLE = 1;
+    const META = 2;
+    const GREEDY = 0;
+    const LAZY = 1;
 
     // PROPERTIES
 
@@ -76,6 +76,9 @@ class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
 
     public function compareTo($str, $flags = self::NORMAL, $length = 1)
     {
+        // strip out bits we don't understand
+        $flags &= (self::CASE_INSENSITIVE | self::CURRENT_LOCALE | self::NATURAL_ORDER | self::FIRST_N);
+
         $flagsmap = [
             self::NORMAL => 'strcmp',
             self::CASE_INSENSITIVE => 'strcasecmp',
@@ -130,6 +133,9 @@ class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
 
     public function escape($flags = self::NORMAL, $charlist = '')
     {
+        // strip out bits we don't understand
+        $flags &= (self::C_STYLE | self::META);
+
         $flagsmap = [
             self::NORMAL => 'addslashes',
             self::C_STYLE => 'addcslashes',
@@ -242,6 +248,9 @@ class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
 
     public function trim($mask = " \t\n\r\0\x0B", $flags = self::BOTH_ENDS)
     {
+        // strip out bits we don't understand
+        $flags &= (self::END | self::BOTH_ENDS);
+
         $flagsmap = [
             self::START => 'ltrim',
             self::END => 'rtrim',
@@ -252,6 +261,9 @@ class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
 
     public function unescape($flags = self::NORMAL)
     {
+        // strip out bits we don't understand
+        $flags &= (self::C_STYLE | self::META);
+
         $flagsmap = [
             self::NORMAL => 'stripslashes',
             self::C_STYLE => 'stripcslashes',
