@@ -2,7 +2,7 @@
 
 namespace StringObject;
 
-class UStrObj extends AnyStrObj
+class UString extends AnyString
 {
     const NOT_NORMALIZED = 0;
     const NFC = 1;
@@ -119,7 +119,7 @@ class UStrObj extends AnyStrObj
                 0b10000000 | (($cpt >> 6) & 0b00111111),
                 0b10000000 | ($cpt & 0b00111111),
             ];
-        } elseif ($cpt <= 0x10FFFF) {
+        } else {
             $data = [
                 0b11110100,
                 0b10000000 | (($cpt >> 12) & 0b00111111),

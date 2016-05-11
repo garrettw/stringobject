@@ -2,25 +2,25 @@
 
 namespace StringObject\Decorator;
 
-use StringObject\StrObj;
+use StringObject\AString;
 
 class Chunks implements \ArrayAccess, \Countable, \Iterator
 {
-    private $strobj;
+    private $anystring;
     private $length;
     private $ending;
     private $index = 0;
 
-    public function __construct(StrObj $strobj, $length = 76, $ending = "\r\n")
+    public function __construct(AnyString $anystring, $length = 76, $ending = "\r\n")
     {
-        $this->strobj = $strobj;
+        $this->anystring = $anystring;
         $this->length = $length;
         $this->ending = $ending;
     }
 
     public function count()
     {
-        return \ceil($this->strobj->length() / ($this->length + 0.0));
+        return \ceil($this->anystring->length() / ($this->length + 0.0));
     }
 
     public function current()
@@ -45,32 +45,32 @@ class Chunks implements \ArrayAccess, \Countable, \Iterator
 
     public function valid()
     {
-        return ($this->index * $this->length < $this->strobj->length());
+        return ($this->index * $this->length < $this->anystring->length());
     }
 
     public function offsetExists($index)
     {
         $index = (int) $index;
-        return ($index >= 0 && $index * $this->length < $this->strobj->length());
+        return ($index >= 0 && $index * $this->length < $this->anystring->length());
     }
 
     public function offsetGet($index)
     {
         $offset = $index * $this->length;
-        return $this->strobj->substr(
+        return $this->anystring->substr(
             $offset,
-            \min($offset + $this->length, $this->strobj->length() - $offset)
+            \min($offset + $this->length, $this->anystring->length() - $offset)
         )->append($this->ending);
     }
 
     public function offsetSet($offset, $value)
     {
         throw new \LogicException('Cannot assign ' . $value
-            .' to immutable StrObj adapter instance at index ' . $offset);
+            .' to immutable AnyString adapter instance at index ' . $offset);
     }
 
     public function offsetUnset($offset)
     {
-        throw new \LogicException('Cannot unset index ' . $offset . ' on immutable StrObj adapter instance');
+        throw new \LogicException('Cannot unset index ' . $offset . ' on immutable AnyString adapter instance');
     }
 }

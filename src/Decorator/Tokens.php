@@ -2,18 +2,18 @@
 
 namespace StringObject\Decorator;
 
-use StringObject\StrObj;
+use StringObject\AnyString;
 
 class Tokens implements \Iterator
 {
-    private $strobj;
+    private $anystring;
     private $delim;
     private $index = 0;
     private $curval;
 
-    public function __construct(StrObj $strobj, $delim)
+    public function __construct(AnyString $anystring, $delim)
     {
-        $this->strobj = $strobj;
+        $this->anystring = $anystring;
         $this->delim = $delim;
     }
 
@@ -34,14 +34,14 @@ class Tokens implements \Iterator
 
     public function next()
     {
-        $this->curval = $this->strobj->nextToken($this->delim);
+        $this->curval = $this->anystring->nextToken($this->delim);
         $this->index++;
     }
 
     public function rewind()
     {
-        $this->strobj->resetToken();
-        $this->curval = $this->strobj->nextToken($this->delim);
+        $this->anystring->resetToken();
+        $this->curval = $this->anystring->nextToken($this->delim);
         $this->index = 0;
     }
 

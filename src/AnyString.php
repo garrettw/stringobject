@@ -2,7 +2,7 @@
 
 namespace StringObject;
 
-abstract class AnyStrObj
+abstract class AnyString
 {
     protected $raw;
 

@@ -2,9 +2,9 @@
 
 namespace StringObject\Decorator;
 
-use StringObject\StrObj;
+use StringObject\AnyString;
 
-class TextStrObj
+class TextString
 {
 
 }

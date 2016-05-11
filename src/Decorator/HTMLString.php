@@ -2,9 +2,9 @@
 
 namespace StringObject\Decorator;
 
-use StringObject\StrObj;
+use StringObject\AnyString;
 
-class HTMLStrObj extends TextStrObj
+class HTMLString extends TextString
 {
     public function nl2br()
     {

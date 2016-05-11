@@ -2,7 +2,7 @@
 
 namespace StringObject\Normalize;
 
-use StringObject\AnyStrObj;
+use StringObject\AnyString;
 
 class ASCII
 {
@@ -123,43 +123,43 @@ class ASCII
     ];
 
     // PROPERTIES
-    protected $strobj;
+    protected $anystring;
 
-    protected function __construct(AnyStrObj $strobj)
+    protected function __construct(AnyString $anytring)
     {
-        $this->strobj = $strobj;
+        $this->anystring = $anystring;
 
     }
 
     public function __call($name, $args)
     {
-        return $this->strobj->$name($args);
+        return $this->anystring->$name($args);
     }
 
     public function __toString()
     {
-        return $this->strobj->__toString();
+        return $this->anystring->__toString();
     }
 
-    public static function convert(AnyStrObj $strobj)
+    public static function convert(AnyString $anystring)
     {
-        $str = $strobj->raw;
+        $str = $anystring->raw;
         foreach (self::$asciimap as $key => $value) {
             $str = \str_replace($value, $key, $str);
         }
-        return self::duplicate($strobj, $str);
+        return self::duplicate($anystring, $str);
     }
 
-    public static function convertPure(AnyStrObj $strobj)
+    public static function convertPure(AnyString $anystring)
     {
-        $asciiobj = self::convert($strobj);
+        $asciiobj = self::convert($anystring);
         $str = \preg_replace('/[^\x20-\x7E]/u', '', $asciiobj->__toString());
-        return self::duplicate($strobj, $str);
+        return self::duplicate($anystring, $str);
     }
 
-    protected static function duplicate(AnyStrObj $strobj, $str)
+    protected static function duplicate(AnyString $anystring, $str)
     {
-        $classname = \get_class($strobj);
+        $classname = \get_class($anystring);
         return new self(new $classname($str));
     }
 }

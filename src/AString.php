@@ -2,7 +2,7 @@
 
 namespace StringObject;
 
-class StrObj extends AnyStrObj implements \ArrayAccess, \Countable, \Iterator
+class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
 {
     // CONSTANTS
 
@@ -376,12 +376,12 @@ class StrObj extends AnyStrObj implements \ArrayAccess, \Countable, \Iterator
 
     public function offsetSet($offset, $value)
     {
-        throw new \LogicException('Cannot assign ' . $value . ' to immutable StrObj instance at index ' . $offset);
+        throw new \LogicException('Cannot assign ' . $value . ' to immutable AString instance at index ' . $offset);
     }
 
     public function offsetUnset($offset)
     {
-        throw new \LogicException('Cannot unset index ' . $offset . ' on immutable StrObj instance');
+        throw new \LogicException('Cannot unset index ' . $offset . ' on immutable AString instance');
     }
 
     // PRIVATE STATIC FUNCTIONS
