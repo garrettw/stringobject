@@ -43,6 +43,8 @@ abstract class AnyString
      */
     abstract public function replace($search, $replace, $mode = self::NORMAL);
 
+    abstract public function replaceWhole($replacement = '');
+
     abstract public function resetToken();
 
     abstract public function times($times);

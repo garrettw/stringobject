@@ -199,6 +199,11 @@ class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
         return new self(\substr_replace($this->raw, $replacement, $start, $length));
     }
 
+    public function replaceWhole($replacement = '')
+    {
+        return new self($replacement);
+    }
+
     public function resetToken()
     {
         $this->token = false;
@@ -382,16 +387,5 @@ class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
     public function offsetUnset($offset)
     {
         throw new \LogicException('Cannot unset index ' . $offset . ' on immutable AString instance');
-    }
-
-    // PRIVATE STATIC FUNCTIONS
-
-    protected static function testStringableObject($thing)
-    {
-        if (\is_object($thing) && !\method_exists($thing, '__toString')) {
-            throw new \InvalidArgumentException(
-                'Parameter is an object that does not implement __toString() method'
-            );
-        }
     }
 }
