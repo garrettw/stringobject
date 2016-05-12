@@ -136,6 +136,9 @@ class ASCII
         return $this->anystring->$name($args);
     }
 
+    /**
+     * @return AnyString
+     */
     public function __toString()
     {
         return $this->anystring->__toString();

@@ -30,6 +30,9 @@ abstract class AnyString
 
     abstract public function compareTo($str, $mode = self::NORMAL, $length = 1);
 
+    /**
+     * @return AnyString
+     */
     abstract public function escape($mode = self::NORMAL, $charlist = '');
 
     abstract public function nextToken($delim);
@@ -43,6 +46,9 @@ abstract class AnyString
      */
     abstract public function replace($search, $replace, $mode = self::NORMAL);
 
+    /**
+     * @return AnyString
+     */
     abstract public function replaceWhole($replacement = '');
 
     abstract public function resetToken();
@@ -51,6 +57,9 @@ abstract class AnyString
 
     abstract public function translate($search, $replace = '');
 
+    /**
+     * @return AnyString
+     */
     abstract public function trim($mask = " \t\n\r\0\x0B", $mode = self::BOTH_ENDS);
 
     abstract public function unescape($mode = self::NORMAL);
