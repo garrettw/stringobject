@@ -2,8 +2,6 @@
 
 namespace StringObject;
 
-use StringObject\AnyString;
-
 class AStringBuilder extends AString
 {
     // MODIFYING METHODS

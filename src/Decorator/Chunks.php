@@ -2,7 +2,7 @@
 
 namespace StringObject\Decorator;
 
-use StringObject\AString;
+use StringObject\AnyString;
 
 class Chunks implements \ArrayAccess, \Countable, \Iterator
 {

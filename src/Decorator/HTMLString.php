@@ -2,8 +2,6 @@
 
 namespace StringObject\Decorator;
 
-use StringObject\AnyString;
-
 class HTMLString extends TextString
 {
     public function nl2br()

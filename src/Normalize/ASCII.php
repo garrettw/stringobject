@@ -125,7 +125,7 @@ class ASCII
     // PROPERTIES
     protected $anystring;
 
-    protected function __construct(AnyString $anytring)
+    protected function __construct(AnyString $anystring)
     {
         $this->anystring = $anystring;
 
