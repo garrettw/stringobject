@@ -6,7 +6,7 @@ use StringObject\AnyString;
 
 class TextString
 {
-    private $anystring;
+    protected $anystring;
 
     public function __construct(AnyString $anystring)
     {

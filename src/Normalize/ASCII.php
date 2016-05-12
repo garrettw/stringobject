@@ -160,6 +160,9 @@ class ASCII
         return self::duplicate($anystring, $str);
     }
 
+    /**
+     * @param string $str
+     */
     protected static function duplicate(AnyString $anystring, $str)
     {
         $classname = \get_class($anystring);
