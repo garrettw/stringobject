@@ -205,11 +205,6 @@ class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
         return new self(\substr_replace($this->raw, $replacement, $start, $length));
     }
 
-    public function replaceWhole($replacement = '')
-    {
-        return new self($replacement);
-    }
-
     public function resetToken()
     {
         $this->token = false;

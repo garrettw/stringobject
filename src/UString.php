@@ -96,7 +96,13 @@ class UString extends AnyString
 
     }
 
-    public function normalize()
+    public function length()
+    {
+        $this->parse();
+        return \count($this->chars);
+    }
+
+    public function normalize($target = self::NFC)
     {
 
     }

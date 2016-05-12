@@ -137,7 +137,7 @@ class ASCII
     }
 
     /**
-     * @return AnyString
+     * @return string
      */
     public function __toString()
     {

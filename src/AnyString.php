@@ -49,7 +49,10 @@ abstract class AnyString
     /**
      * @return AnyString
      */
-    abstract public function replaceWhole($replacement = '');
+    public function replaceWhole($replacement = '')
+    {
+        return new self($replacement);
+    }
 
     abstract public function resetToken();
 

@@ -6,11 +6,13 @@ class HTMLString extends TextString
 {
     public function nl2br()
     {
-        return $this->replaceWhole(\nl2br($this->raw, false));
+        $this->anystring = $this->anystring->replaceWhole(\nl2br($this->raw, false));
+        return $this;
     }
 
     public function nl2brX()
     {
-        return $this->replaceWhole(\nl2br($this->raw, true));
+        $this->anystring = $this->anystring->replaceWhole(\nl2br($this->raw, true));
+        return $this;
     }
 }
