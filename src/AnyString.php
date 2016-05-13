@@ -27,6 +27,9 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
     protected $caret = 0;
 
 
+    /**
+     * @param mixed $thing Anything that can be cast to a string
+     */
     public function __construct($thing)
     {
         self::testStringableObject($thing);
@@ -83,6 +86,9 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
 
     // END Iterator methods }
 
+    /**
+     * @return array
+     */
     abstract public function toArray($delim = '', $limit = null);
 
     abstract public function compareTo($str, $mode = self::NORMAL, $length = 1);
