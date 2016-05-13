@@ -2,48 +2,9 @@
 
 namespace StringObject;
 
-class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
+class AString extends AnyString
 {
-    // CONSTANTS
-
-    const START = 0;
-    const END = 1;
-    const BOTH_ENDS = 2;
-    const NORMAL = 0;
-    const CASE_INSENSITIVE = 1;
-    const REVERSE = 2;
-    const EXACT_POSITION = 4;
-    const CURRENT_LOCALE = 2;
-    const NATURAL_ORDER = 4;
-    const FIRST_N = 8;
-    const C_STYLE = 1;
-    const META = 2;
-    const GREEDY = 0;
-    const LAZY = 1;
-
-    // PROPERTIES
-
-    protected $raw;
     protected $token = false;
-    protected $caret = 0;
-
-    // MAGIC METHODS
-
-    /**
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        return $this->$name;
-    }
-
-    /**
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->raw;
-    }
 
     public function toArray($delim = '', $limit = null)
     {
@@ -114,16 +75,33 @@ class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
         return \strlen($this->raw);
     }
 
+    public function substr($start, $length = 'omitted')
+    {
+        if ($length === 'omitted') {
+            return new self(\substr($this->raw, $start));
+        }
+        return new self(\substr($this->raw, $start, $length));
+    }
+
+    public function nextToken($delim)
+    {
+        if ($this->token) {
+            return new self(\strtok($delim));
+        }
+        $this->token = true;
+        return new self(\strtok($this->raw, $delim));
+    }
+
     // MODIFYING METHODS
 
     public function append($str)
     {
-        return new self($this->raw . $str);
+        return $this->replaceWhole($this->raw . $str);
     }
 
     public function chunk($length = 76, $ending = "\r\n")
     {
-        return new self(\chunk_split($this->raw, $length, $ending));
+        return $this->replaceWhole(\chunk_split($this->raw, $length, $ending));
     }
 
     public function concat($str)
@@ -142,9 +120,19 @@ class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
             self::META => 'quotemeta',
         ];
         if ($flags === self::C_STYLE) {
-            return new self(\call_user_func($flagsmap[$flags], $this->raw, $charlist));
+            return $this->replaceWhole(\call_user_func($flagsmap[$flags], $this->raw, $charlist));
         }
-        return new self(\call_user_func($flagsmap[$flags], $this->raw));
+        return $this->replaceWhole(\call_user_func($flagsmap[$flags], $this->raw));
+    }
+
+    public function hexDecode()
+    {
+        return $this->replaceWhole(\hex2bin($this->raw));
+    }
+
+    public function hexEncode()
+    {
+        return $this->replaceWhole(\bin2hex($this->raw));
     }
 
     public function insertAt($str, $offset)
@@ -152,23 +140,14 @@ class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
         return $this->replaceSubstr($str, $offset, 0);
     }
 
-    public function nextToken($delim)
-    {
-        if ($this->token) {
-            return new self(\strtok($delim));
-        }
-        $this->token = true;
-        return new self(\strtok($this->raw, $delim));
-    }
-
     public function pad($newlength, $padding = ' ', $flags = self::END)
     {
-        return new self(\str_pad($this->raw, $newlength, $padding, $flags));
+        return $this->replaceWhole(\str_pad($this->raw, $newlength, $padding, $flags));
     }
 
     public function prepend($str)
     {
-        return new self($str . $this->raw);
+        return $this->replaceWhole($str . $this->raw);
     }
 
     public function remove($str, $flags = self::NORMAL)
@@ -183,7 +162,7 @@ class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
 
     public function repeat($times)
     {
-        return new self(\str_repeat($this->raw, $times));
+        return $this->replaceWhole(\str_repeat($this->raw, $times));
     }
 
     /**
@@ -192,9 +171,9 @@ class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
     public function replace($search, $replace, $flags = self::NORMAL)
     {
         if ($flags & self::CASE_INSENSITIVE) {
-            return new self(\str_ireplace($search, $replace, $this->raw));
+            return $this->replaceWhole(\str_ireplace($search, $replace, $this->raw));
         }
-        return new self(\str_replace($search, $replace, $this->raw));
+        return $this->replaceWhole(\str_replace($search, $replace, $this->raw));
     }
 
     public function replaceSubstr($replacement, $start, $length = null)
@@ -202,7 +181,7 @@ class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
         if ($length === null) {
             $length = $this->length();
         }
-        return new self(\substr_replace($this->raw, $replacement, $start, $length));
+        return $this->replaceWhole(\substr_replace($this->raw, $replacement, $start, $length));
     }
 
     public function resetToken()
@@ -212,20 +191,12 @@ class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
 
     public function reverse()
     {
-        return new self(\strrev($this->raw));
+        return $this->replaceWhole(\strrev($this->raw));
     }
 
     public function shuffle()
     {
-        return new self(\str_shuffle($this->raw));
-    }
-
-    public function substr($start, $length = 'omitted')
-    {
-        if ($length === 'omitted') {
-            return new self(\substr($this->raw, $start));
-        }
-        return new self(\substr($this->raw, $start, $length));
+        return $this->replaceWhole(\str_shuffle($this->raw));
     }
 
     public function times($times)
@@ -236,9 +207,9 @@ class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
     public function translate($search, $replace = '')
     {
         if (is_array($search)) {
-            return new self(\strtr($this->raw, $search));
+            return $this->replaceWhole(\strtr($this->raw, $search));
         }
-        return new self(\strtr($this->raw, $search, $replace));
+        return $this->replaceWhole(\strtr($this->raw, $search, $replace));
     }
 
     public function trim($mask = " \t\n\r\0\x0B", $flags = self::BOTH_ENDS)
@@ -251,7 +222,7 @@ class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
             self::END => 'rtrim',
             self::BOTH_ENDS => 'trim',
         ];
-        return new self(\call_user_func($flagsmap[$flags], $this->raw, $mask));
+        return $this->replaceWhole(\call_user_func($flagsmap[$flags], $this->raw, $mask));
     }
 
     public function unescape($flags = self::NORMAL)
@@ -264,27 +235,27 @@ class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
             self::C_STYLE => 'stripcslashes',
             self::META => 'stripslashes',
         ];
-        return new self(\call_user_func($flagsmap[$flags], $this->raw));
+        return $this->replaceWhole(\call_user_func($flagsmap[$flags], $this->raw));
     }
 
     public function uuDecode()
     {
-        return new self(\convert_uudecode($this->raw));
+        return $this->replaceWhole(\convert_uudecode($this->raw));
     }
 
     public function uuEncode()
     {
-        return new self(\convert_uuencode($this->raw));
+        return $this->replaceWhole(\convert_uuencode($this->raw));
     }
 
     public function wordwrap($width = 75, $break = "\n")
     {
-        return new self(\wordwrap($this->raw, $width, $break, false));
+        return $this->replaceWhole(\wordwrap($this->raw, $width, $break, false));
     }
 
     public function wordwrapBreaking($width = 75, $break = "\n")
     {
-        return new self(\wordwrap($this->raw, $width, $break, true));
+        return $this->replaceWhole(\wordwrap($this->raw, $width, $break, true));
     }
 
     // TESTING METHODS
@@ -353,32 +324,6 @@ class AString extends AnyString implements \ArrayAccess, \Countable, \Iterator
     public function current()
     {
         return $this->raw[$this->caret];
-    }
-
-    public function key()
-    {
-        return $this->caret;
-    }
-
-    public function next()
-    {
-        $this->caret++;
-    }
-
-    public function rewind()
-    {
-        $this->caret = 0;
-    }
-
-    public function valid()
-    {
-        return ($this->caret < \strlen($this->raw));
-    }
-
-    public function offsetExists($offset)
-    {
-        $offset = (int) $offset;
-        return ($offset >= 0 && $offset < \strlen($this->raw));
     }
 
     public function offsetGet($offset)

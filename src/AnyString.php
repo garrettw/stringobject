@@ -2,9 +2,30 @@
 
 namespace StringObject;
 
-abstract class AnyString
+abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
 {
+    // CONSTANTS
+
+    const START = 0;
+    const END = 1;
+    const BOTH_ENDS = 2;
+    const NORMAL = 0;
+    const CASE_INSENSITIVE = 1;
+    const REVERSE = 2;
+    const EXACT_POSITION = 4;
+    const CURRENT_LOCALE = 2;
+    const NATURAL_ORDER = 4;
+    const FIRST_N = 8;
+    const C_STYLE = 1;
+    const META = 2;
+    const GREEDY = 0;
+    const LAZY = 1;
+
+    // PROPERTIES
+
     protected $raw;
+    protected $caret = 0;
+
 
     public function __construct($thing)
     {
@@ -27,6 +48,42 @@ abstract class AnyString
     {
         return $this->raw;
     }
+
+    // ArrayAccess methods {
+
+    public function offsetExists($offset)
+    {
+        $offset = (int) $offset;
+        return ($offset >= 0 && $offset < $this->count());
+    }
+
+    // END ArrayAccess methods }
+
+    // Iterator methods {
+
+    public function key()
+    {
+        return $this->caret;
+    }
+
+    public function next()
+    {
+        $this->caret++;
+    }
+
+    public function rewind()
+    {
+        $this->caret = 0;
+    }
+
+    public function valid()
+    {
+        return ($this->caret < $this->count());
+    }
+
+    // END Iterator methods }
+
+    abstract public function toArray($delim = '', $limit = null);
 
     abstract public function compareTo($str, $mode = self::NORMAL, $length = 1);
 
@@ -51,7 +108,7 @@ abstract class AnyString
      */
     public function replaceWhole($replacement = '')
     {
-        return new self($replacement);
+        return new static($replacement);
     }
 
     abstract public function resetToken();
@@ -85,6 +142,10 @@ abstract class AnyString
 
     protected static function testStringableObject($thing)
     {
+        if (is_string($thing)) {
+            return true;
+        }
+
         if (\is_object($thing) && !\method_exists($thing, '__toString')) {
             throw new \InvalidArgumentException(
                 'Parameter is an object that does not implement __toString() method'
