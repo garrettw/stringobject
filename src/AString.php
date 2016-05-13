@@ -24,7 +24,7 @@ class AString extends AnyString
 
     public function charAt($offset)
     {
-        return new self($this->raw{$offset});
+        return new static($this->raw{$offset});
     }
 
     /**
@@ -78,18 +78,18 @@ class AString extends AnyString
     public function substr($start, $length = 'omitted')
     {
         if ($length === 'omitted') {
-            return new self(\substr($this->raw, $start));
+            return new static(\substr($this->raw, $start));
         }
-        return new self(\substr($this->raw, $start, $length));
+        return new static(\substr($this->raw, $start, $length));
     }
 
     public function nextToken($delim)
     {
         if ($this->token) {
-            return new self(\strtok($delim));
+            return new static(\strtok($delim));
         }
         $this->token = true;
-        return new self(\strtok($this->raw, $delim));
+        return new static(\strtok($this->raw, $delim));
     }
 
     // MODIFYING METHODS
