@@ -25,7 +25,7 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
 
     protected $raw;
     protected $caret = 0;
-
+    protected $token = false;
 
     /**
      * @param mixed $thing Anything that can be cast to a string
@@ -103,10 +103,16 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
      */
     abstract public function toArray($delim = '', $limit = null);
 
+    /**
+     * @return AnyString
+     */
     abstract public function append($str);
 
     abstract public function compareTo($str, $mode = self::NORMAL, $length = 1);
 
+    /**
+     * @return AnyString
+     */
     public function concat($str)
     {
         return $this->append($str);
@@ -136,10 +142,16 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
         return new static(\strtok($this->raw, $delim));
     }
 
+    /**
+     * @return AnyString
+     */
     abstract public function prepend($str);
 
     abstract public function remove($str, $mode = self::NORMAL);
 
+    /**
+     * @return AnyString
+     */
     abstract public function removeSubstr($start, $length = null);
 
     abstract public function repeat($times);
@@ -149,6 +161,9 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
      */
     abstract public function replace($search, $replace, $mode = self::NORMAL);
 
+    /**
+     * @return AnyString
+     */
     abstract public function replaceSubstr($replacement, $start, $length = null);
 
     /**
@@ -164,6 +179,11 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
         $this->token = false;
     }
 
+    abstract public function substr($start, $length = 'omitted');
+
+    /**
+     * @return AnyString
+     */
     public function times($times)
     {
         return $this->repeat($times);

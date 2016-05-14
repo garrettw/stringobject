@@ -4,8 +4,6 @@ namespace StringObject;
 
 class AString extends AnyString
 {
-    protected $token = false;
-
     public function toArray($delim = '', $limit = null)
     {
         if (empty($delim)) {
