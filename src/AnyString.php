@@ -86,54 +86,6 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
 
     // END Iterator methods }
 
-    /**
-     * @return array
-     */
-    abstract public function toArray($delim = '', $limit = null);
-
-    abstract public function compareTo($str, $mode = self::NORMAL, $length = 1);
-
-    /**
-     * @return AnyString
-     */
-    abstract public function escape($mode = self::NORMAL, $charlist = '');
-
-    abstract public function nextToken($delim);
-
-    abstract public function remove($str, $mode = self::NORMAL);
-
-    abstract public function repeat($times);
-
-    /**
-     * @param string $replace
-     */
-    abstract public function replace($search, $replace, $mode = self::NORMAL);
-
-    /**
-     * @return AnyString
-     */
-    public function replaceWhole($replacement = '')
-    {
-        return new static($replacement);
-    }
-
-    abstract public function resetToken();
-
-    abstract public function times($times);
-
-    abstract public function translate($search, $replace = '');
-
-    /**
-     * @return AnyString
-     */
-    abstract public function trim($mask = " \t\n\r\0\x0B", $mode = self::BOTH_ENDS);
-
-    abstract public function unescape($mode = self::NORMAL);
-
-    abstract public function uuDecode();
-
-    abstract public function uuEncode();
-
     public function equals($str)
     {
         self::testStringableObject($str);
@@ -145,6 +97,96 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
     abstract public function isAscii();
 
     abstract public function isEmpty();
+
+    /**
+     * @return array
+     */
+    abstract public function toArray($delim = '', $limit = null);
+
+    abstract public function append($str);
+
+    abstract public function compareTo($str, $mode = self::NORMAL, $length = 1);
+
+    public function concat($str)
+    {
+        return $this->append($str);
+    }
+
+    /**
+     * @return AnyString
+     */
+    abstract public function escape($mode = self::NORMAL, $charlist = '');
+
+    public function hexDecode()
+    {
+        return $this->replaceWhole(\hex2bin($this->raw));
+    }
+
+    public function hexEncode()
+    {
+        return $this->replaceWhole(\bin2hex($this->raw));
+    }
+
+    public function nextToken($delim)
+    {
+        if ($this->token) {
+            return new static(\strtok($delim));
+        }
+        $this->token = true;
+        return new static(\strtok($this->raw, $delim));
+    }
+
+    abstract public function prepend($str);
+
+    abstract public function remove($str, $mode = self::NORMAL);
+
+    abstract public function removeSubstr($start, $length = null);
+
+    abstract public function repeat($times);
+
+    /**
+     * @param string $replace
+     */
+    abstract public function replace($search, $replace, $mode = self::NORMAL);
+
+    abstract public function replaceSubstr($replacement, $start, $length = null);
+
+    /**
+     * @return AnyString
+     */
+    public function replaceWhole($replacement = '')
+    {
+        return new static($replacement);
+    }
+
+    public function resetToken()
+    {
+        $this->token = false;
+    }
+
+    public function times($times)
+    {
+        return $this->repeat($times);
+    }
+
+    abstract public function translate($search, $replace = '');
+
+    /**
+     * @return AnyString
+     */
+    abstract public function trim($mask = " \t\n\r\0\x0B", $mode = self::BOTH_ENDS);
+
+    abstract public function unescape($mode = self::NORMAL);
+
+    public function uuDecode()
+    {
+        return $this->replaceWhole(\convert_uudecode($this->raw));
+    }
+
+    public function uuEncode()
+    {
+        return $this->replaceWhole(\convert_uuencode($this->raw));
+    }
 
     protected static function testStringableObject($thing)
     {

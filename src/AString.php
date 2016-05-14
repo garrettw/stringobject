@@ -83,15 +83,6 @@ class AString extends AnyString
         return new static(\substr($this->raw, $start, $length));
     }
 
-    public function nextToken($delim)
-    {
-        if ($this->token) {
-            return new static(\strtok($delim));
-        }
-        $this->token = true;
-        return new static(\strtok($this->raw, $delim));
-    }
-
     // MODIFYING METHODS
 
     public function append($str)
@@ -102,11 +93,6 @@ class AString extends AnyString
     public function chunk($length = 76, $ending = "\r\n")
     {
         return $this->replaceWhole(\chunk_split($this->raw, $length, $ending));
-    }
-
-    public function concat($str)
-    {
-        return $this->append($str);
     }
 
     public function escape($flags = self::NORMAL, $charlist = '')
@@ -123,16 +109,6 @@ class AString extends AnyString
             return $this->replaceWhole(\call_user_func($flagsmap[$flags], $this->raw, $charlist));
         }
         return $this->replaceWhole(\call_user_func($flagsmap[$flags], $this->raw));
-    }
-
-    public function hexDecode()
-    {
-        return $this->replaceWhole(\hex2bin($this->raw));
-    }
-
-    public function hexEncode()
-    {
-        return $this->replaceWhole(\bin2hex($this->raw));
     }
 
     public function insertAt($str, $offset)
@@ -184,11 +160,6 @@ class AString extends AnyString
         return $this->replaceWhole(\substr_replace($this->raw, $replacement, $start, $length));
     }
 
-    public function resetToken()
-    {
-        $this->token = false;
-    }
-
     public function reverse()
     {
         return $this->replaceWhole(\strrev($this->raw));
@@ -197,11 +168,6 @@ class AString extends AnyString
     public function shuffle()
     {
         return $this->replaceWhole(\str_shuffle($this->raw));
-    }
-
-    public function times($times)
-    {
-        return $this->repeat($times);
     }
 
     public function translate($search, $replace = '')
@@ -236,16 +202,6 @@ class AString extends AnyString
             self::META => 'stripslashes',
         ];
         return $this->replaceWhole(\call_user_func($flagsmap[$flags], $this->raw));
-    }
-
-    public function uuDecode()
-    {
-        return $this->replaceWhole(\convert_uudecode($this->raw));
-    }
-
-    public function uuEncode()
-    {
-        return $this->replaceWhole(\convert_uuencode($this->raw));
     }
 
     public function wordwrap($width = 75, $break = "\n")

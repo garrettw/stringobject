@@ -157,7 +157,7 @@ class TextString
 
     public function toPureASCII()
     {
-        $asciiobj = self::toASCII($this->anystring);
+        $asciiobj = self::toASCII();
         $str = \preg_replace('/[^\x20-\x7E]/u', '', $asciiobj->__toString());
         return self::duplicate($this->anystring, $str);
     }
