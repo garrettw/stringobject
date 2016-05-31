@@ -111,12 +111,14 @@ class AStringSpec extends ObjectBehavior
 
     function it_can_hexencode()
     {
-
+        $this->beConstructedWith('Hello');
+        $this->hexEncode()->raw->shouldBe('48656c6c6f');
     }
 
     function it_can_hexdecode()
     {
-
+        $this->beConstructedWith('48656c6c6f');
+        $this->hexDecode()->raw->shouldBe('Hello');
     }
 
     function it_can_insertat()
