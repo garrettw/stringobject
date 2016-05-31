@@ -73,14 +73,6 @@ class AString extends AnyString
         return \strlen($this->raw);
     }
 
-    public function substr($start, $length = 'omitted')
-    {
-        if ($length === 'omitted') {
-            return new static(\substr($this->raw, $start));
-        }
-        return new static(\substr($this->raw, $start, $length));
-    }
-
     // MODIFYING METHODS
 
     public function append($str)
@@ -168,6 +160,14 @@ class AString extends AnyString
         return $this->replaceWhole(\str_shuffle($this->raw));
     }
 
+    public function substr($start, $length = 'omitted')
+    {
+        if ($length === 'omitted') {
+            return new static(\substr($this->raw, $start));
+        }
+        return new static(\substr($this->raw, $start, $length));
+    }
+
     public function translate($search, $replace = '')
     {
         if (is_array($search)) {
@@ -200,16 +200,6 @@ class AString extends AnyString
             self::META => 'stripslashes',
         ];
         return $this->replaceWhole(\call_user_func($flagsmap[$flags], $this->raw));
-    }
-
-    public function wordwrap($width = 75, $break = "\n")
-    {
-        return $this->replaceWhole(\wordwrap($this->raw, $width, $break, false));
-    }
-
-    public function wordwrapBreaking($width = 75, $break = "\n")
-    {
-        return $this->replaceWhole(\wordwrap($this->raw, $width, $break, true));
     }
 
     // TESTING METHODS

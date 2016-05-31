@@ -162,6 +162,16 @@ class TextString
         return self::duplicate($this->anystring, $str);
     }
 
+    public function wordwrap($width = 75, $break = "\n")
+    {
+        return self::duplicate($this->anystring, \wordwrap($this->__toString(), $width, $break, false));
+    }
+
+    public function wordwrapBreaking($width = 75, $break = "\n")
+    {
+        return self::duplicate($this->anystring, \wordwrap($this->__toString(), $width, $break, true));
+    }
+
     /**
      * @param string $str
      */

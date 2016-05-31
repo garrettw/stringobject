@@ -179,6 +179,9 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
         $this->token = false;
     }
 
+    /**
+     * @return AnyString
+     */
     abstract public function substr($start, $length = 'omitted');
 
     /**

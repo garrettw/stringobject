@@ -109,6 +109,16 @@ class AStringSpec extends ObjectBehavior
         $this->escape(AString::META)->raw->shouldBe('Hello world\. \(can you hear me\?\)');
     }
 
+    function it_can_hexencode()
+    {
+
+    }
+
+    function it_can_hexdecode()
+    {
+
+    }
+
     function it_can_insertat()
     {
         $this->beConstructedWith('ABCDEFGH:/MNRPQR/');
@@ -241,18 +251,6 @@ class AStringSpec extends ObjectBehavior
     {
         $this->beConstructedWith("test\ntext text\r\n");
         $this->uuEncode()->raw->shouldBe("0=&5S=`IT97AT('1E>'0-\"@``\n`\n");
-    }
-
-    function it_can_wordwrap()
-    {
-        $this->beConstructedWith('A very long woooooooooooord.');
-        $this->wordwrap(8, "\n")->raw->shouldBe("A very\nlong\nwoooooooooooord.");
-    }
-
-    function it_can_wordwrapbreaking()
-    {
-        $this->beConstructedWith('A very long woooooooooooord.');
-        $this->wordwrapBreaking(8, "\n")->raw->shouldBe("A very\nlong\nwooooooo\nooooord.");
     }
 
     function it_can_contains()

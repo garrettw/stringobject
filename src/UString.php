@@ -102,9 +102,17 @@ class UString extends AnyString
         return \count($this->chars);
     }
 
-    public function normalize($target = self::NFC)
+    public function normalize(Normalize\Normalizer $norm)
     {
+        $this->parse();
+        $result = $norm->normalize($this);
 
+        if (is_int($result)) {
+            // it was already normalized
+            $this->normform = $result;
+            return $this;
+        }
+        return $this->replaceWhole($result);
     }
 
     /**
