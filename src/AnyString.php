@@ -94,8 +94,14 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
         return ($str == $this->raw);
     }
 
+    /**
+     * @return bool
+     */
     abstract public function isAscii();
 
+    /**
+     * @return bool
+     */
     abstract public function isEmpty();
 
     /**
@@ -108,6 +114,9 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
      */
     abstract public function append($str);
 
+    /**
+     * @return int
+     */
     abstract public function compareTo($str, $mode = self::NORMAL, $length = 1);
 
     /**
@@ -147,6 +156,9 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
      */
     abstract public function prepend($str);
 
+    /**
+     * @return AnyString
+     */
     abstract public function remove($str, $mode = self::NORMAL);
 
     /**
@@ -154,10 +166,15 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
      */
     abstract public function removeSubstr($start, $length = null);
 
+    /**
+     * @return AnyString
+     */
     abstract public function repeat($times);
 
     /**
      * @param string $replace
+     *
+     * @return AnyString
      */
     abstract public function replace($search, $replace, $mode = self::NORMAL);
 
@@ -192,6 +209,9 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
         return $this->repeat($times);
     }
 
+    /**
+     * @return AnyString
+     */
     abstract public function translate($search, $replace = '');
 
     /**
@@ -199,6 +219,9 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
      */
     abstract public function trim($mask = " \t\n\r\0\x0B", $mode = self::BOTH_ENDS);
 
+    /**
+     * @return AnyString
+     */
     abstract public function unescape($mode = self::NORMAL);
 
     public function uuDecode()
