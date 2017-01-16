@@ -75,11 +75,6 @@ class AString extends AnyString
 
     // MODIFYING METHODS
 
-    public function append($str)
-    {
-        return $this->replaceWhole($this->raw . $str);
-    }
-
     public function chunk($length = 76, $ending = "\r\n")
     {
         return $this->replaceWhole(\chunk_split($this->raw, $length, $ending));
@@ -225,31 +220,6 @@ class AString extends AnyString
         $flags &= self::CASE_INSENSITIVE;
         $offset = $this->length() - \strlen($str);
         return $this->contains($str, $offset, $flags | self::EXACT_POSITION | self::REVERSE);
-    }
-
-    public function equals($str)
-    {
-        self::testStringableObject($str);
-
-        $str = (string) $str;
-        return ($str == $this->raw);
-    }
-
-    public function isAscii()
-    {
-        $len = $this->length();
-
-        for ($i = 0; $i < $len; $i++) {
-            if ($this->charCodeAt($i) >= 128) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public function isEmpty()
-    {
-        return empty($this->raw);
     }
 
     public function startsWith($str, $flags = self::NORMAL)

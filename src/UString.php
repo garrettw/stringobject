@@ -4,7 +4,7 @@ namespace StringObject;
 
 class UString extends AnyString
 {
-    const NOT_NORMALIZED = 0;
+    const RAW = 0;
     const NFC = 1;
     const NFD = 2;
     const NFK = 4;
@@ -13,7 +13,7 @@ class UString extends AnyString
 
     protected $chars = [];
     protected $uhandler;
-    protected $normform = self::NOT_NORMALIZED;
+    protected $normform = self::RAW;
 
     protected static $spec = [
         2 => ['mask' => 0b00011111, 'start' => 0x80],
@@ -159,22 +159,25 @@ class UString extends AnyString
      */
     protected static function charLength($byte)
     {
-        if (($byte & 0b11111110) === 0b11111100) {
-            return 6;
-        }
-        if (($byte & 0b11111100) === 0b11111000) {
-            return 5;
-        }
-        if (($byte & 0b11111000) === 0b11110000) {
-            return 4;
-        }
-        if (($byte & 0b11110000) === 0b11100000) {
-            return 3;
+        if ($byte < 192) {
+            return 1;
         }
         if (($byte & 0b11100000) === 0b11000000) {
             return 2;
         }
-        return 1;
+        if (($byte & 0b11110000) === 0b11100000) {
+            return 3;
+        }
+        if (($byte & 0b11111000) === 0b11110000) {
+            return 4;
+        }
+        if (($byte & 0b11111100) === 0b11111000) {
+            return 5;
+        }
+        if (($byte & 0b11111110) === 0b11111100) {
+            return 6;
+        }
+        return false;
     }
 
     private function parse()
@@ -200,15 +203,20 @@ class UString extends AnyString
                     $cache = $char;
                     $ordcache = ($ord & self::$spec[$bytes]['mask']) << (6 * ($bytes - 1));
                     $originOffset = $offset;
-                } elseif ($ord < self::$spec[2]['start']) {
+                    continue;
+                }
+                if ($ord < self::$spec[2]['start']) {
                     // ASCII 7-bit char
                     $this->chars[] = [$char, $ord];
-                } else {
-                    // either C0/C1 block or higher; map from cp1252 to utf8 or just convert
-                    $ord = (isset(self::$winc1umap[$ord])) ? self::$winc1umap[$ord] : $ord;
-                    $this->chars[] = [self::cpToUtf8Char($ord), $ord];
-                    $invalid = false;
+                    continue;
                 }
+
+                // either C0/C1 block or higher; map from cp1252 to utf8 or just convert
+                if (isset(self::$winc1umap[$ord])) {
+                    $ord = self::$winc1umap[$ord];
+                }
+                $this->chars[] = [self::cpToUtf8Char($ord), $ord];
+                $invalid = false;
                 continue;
             }
 
@@ -244,7 +252,7 @@ class UString extends AnyString
                 if ($ordcache === 0xFEFF) { // BOM
                     if ($originOffset !== 0) {
                         // if not at beginning, store as word joiner U+2060
-                        $this->chars[] = [\chr(0xE2) . \chr(0x81) . \chr(0xA0), 0x2060];
+                        $this->chars[] = ["\xE2\x81\xA0", 0x2060];
                     }
                     // otherwise discard
                     continue;

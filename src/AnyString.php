@@ -97,12 +97,25 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
     /**
      * @return bool
      */
-    abstract public function isAscii();
+    public function isAscii()
+    {
+        $len = $this->length();
+
+        for ($i = 0; $i < $len; $i++) {
+            if ($this->charCodeAt($i) >= 128) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     /**
      * @return bool
      */
-    abstract public function isEmpty();
+    public function isEmpty()
+    {
+        return empty($this->raw);
+    }
 
     /**
      * @return array
@@ -112,7 +125,10 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
     /**
      * @return AnyString
      */
-    abstract public function append($str);
+    public function append($str)
+    {
+        return $this->replaceWhole($this->raw . $str);
+    }
 
     /**
      * @return int
