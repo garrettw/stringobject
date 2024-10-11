@@ -4,20 +4,20 @@ namespace StringObject\Decorator;
 
 use StringObject\AnyString;
 
-class Tokens implements \Iterator
+class TokenIterator implements \Iterator
 {
     private $anystring;
     private $delim;
     private $index = 0;
     private $curval;
 
-    public function __construct(AnyString $anystring, $delim)
+    public function __construct(AnyString $anystring, string $delim)
     {
         $this->anystring = $anystring;
         $this->delim = $delim;
     }
 
-    public function changeToken($delim)
+    public function changeToken(string $delim)
     {
         $this->delim = $delim;
     }

@@ -2,9 +2,9 @@
 
 namespace StringObject;
 
-class AsciiString extends AnyString
+class AsciiString extends AbstractString
 {
-    public function toArray($delim = '', $limit = null)
+    public function toArray(string $delim = '', int $limit = null): array
     {
         if (empty($delim)) {
             return \str_split($this->raw);
@@ -20,17 +20,17 @@ class AsciiString extends AnyString
 
     // INFORMATIONAL METHODS
 
-    public function charAt($offset)
+    public function charAt(int $offset): static
     {
         return new static($this->raw[$offset]);
     }
 
-    public function compareTo($str, $flags = self::NORMAL, $length = 1)
+    public function compareTo(string $str, int $mode = self::NORMAL, int $length = 1): int
     {
         // strip out bits we don't understand
-        $flags &= (self::CASE_INSENSITIVE | self::CURRENT_LOCALE | self::NATURAL_ORDER | self::FIRST_N);
+        $mode &= (self::CASE_INSENSITIVE | self::CURRENT_LOCALE | self::NATURAL_ORDER | self::FIRST_N);
 
-        $flagsmap = [
+        $modesmap = [
             self::NORMAL => 'strcmp',
             self::CASE_INSENSITIVE => 'strcasecmp',
             self::CURRENT_LOCALE => 'strcoll',
@@ -40,91 +40,88 @@ class AsciiString extends AnyString
             (self::FIRST_N | self::CASE_INSENSITIVE) => 'strncasecmp',
         ];
 
-        if ($flags & self::FIRST_N) {
-            return \call_user_func($flagsmap[$flags], $this->raw, $str, $length);
+        if ($mode & self::FIRST_N) {
+            return \call_user_func($modesmap[$mode], $this->raw, $str, $length);
         }
-        return \call_user_func($flagsmap[$flags], $this->raw, $str);
+        return \call_user_func($modesmap[$mode], $this->raw, $str);
     }
 
-    public function indexOf($needle, $offset = 0, $flags = self::NORMAL)
+    public function indexOf(string $needle, int $offset = 0, int $mode = self::NORMAL): mixed
     {
         // strip out bits we don't understand
-        $flags &= (self::REVERSE | self::CASE_INSENSITIVE);
+        $mode &= (self::REVERSE | self::CASE_INSENSITIVE);
 
-        $flagsmap = [
+        $modesmap = [
             self::NORMAL => 'strpos',
             self::CASE_INSENSITIVE => 'stripos',
             self::REVERSE => 'strrpos',
             (self::REVERSE | self::CASE_INSENSITIVE) => 'strripos',
         ];
-        return \call_user_func($flagsmap[$flags], $this->raw, $needle, $offset);
+        return \call_user_func($modesmap[$mode], $this->raw, $needle, $offset);
     }
 
     // MODIFYING METHODS
 
-    public function chunk($length = 76, $ending = "\r\n")
+    public function chunk(int $length = 76, string $ending = "\r\n"): static
     {
         return $this->replaceWhole(\chunk_split($this->raw, $length, $ending));
     }
 
-    public function escape($flags = self::NORMAL, $charlist = '')
+    public function escape(int $mode = self::NORMAL, string $charlist = ''): static
     {
         // strip out bits we don't understand
-        $flags &= (self::C_STYLE | self::META);
+        $mode &= (self::C_STYLE | self::META);
 
-        $flagsmap = [
+        $modesmap = [
             self::NORMAL => 'addslashes',
             self::C_STYLE => 'addcslashes',
             self::META => 'quotemeta',
         ];
-        if ($flags === self::C_STYLE) {
-            return $this->replaceWhole(\call_user_func($flagsmap[$flags], $this->raw, $charlist));
+        if ($mode === self::C_STYLE) {
+            return $this->replaceWhole(\call_user_func($modesmap[$mode], $this->raw, $charlist));
         }
-        return $this->replaceWhole(\call_user_func($flagsmap[$flags], $this->raw));
+        return $this->replaceWhole(\call_user_func($modesmap[$mode], $this->raw));
     }
 
-    public function insertAt($str, $offset)
+    public function insertAt(string $str, int $offset): static
     {
         return $this->replaceSubstr($str, $offset, 0);
     }
 
-    public function pad($newlength, $padding = ' ', $flags = self::END)
+    public function pad(int $length, string $pad_string = ' ', $pad_type = self::END)
     {
-        return $this->replaceWhole(\str_pad($this->raw, $newlength, $padding, $flags));
+        return $this->replaceWhole(\str_pad($this->raw, $length, $pad_string, $pad_type));
     }
 
-    public function prepend($str)
+    public function prepend(string $str): static
     {
         return $this->replaceWhole($str . $this->raw);
     }
 
-    public function remove($str, $flags = self::NORMAL)
+    public function remove(string $str, $mode = self::NORMAL): static
     {
-        return $this->replace($str, '', $flags);
+        return $this->replace($str, '', $mode);
     }
 
-    public function removeSubstr($start, $length = null)
+    public function removeSubstr(int $start, int $length = null): static
     {
         return $this->replaceSubstr('', $start, $length);
     }
 
-    public function repeat($times)
+    public function repeat(int $times): static
     {
         return $this->replaceWhole(\str_repeat($this->raw, $times));
     }
 
-    /**
-     * @param string $replace
-     */
-    public function replace($search, $replace, $flags = self::NORMAL)
+    public function replace(string $search, string $replace, int $mode = self::NORMAL): static
     {
-        if ($flags & self::CASE_INSENSITIVE) {
+        if ($mode & self::CASE_INSENSITIVE) {
             return $this->replaceWhole(\str_ireplace($search, $replace, $this->raw));
         }
         return $this->replaceWhole(\str_replace($search, $replace, $this->raw));
     }
 
-    public function replaceSubstr($replacement, $start, $length = null)
+    public function replaceSubstr(string $replacement, int $start, int $length = null): static
     {
         if ($length === null) {
             $length = $this->length();
@@ -132,17 +129,17 @@ class AsciiString extends AnyString
         return $this->replaceWhole(\substr_replace($this->raw, $replacement, $start, $length));
     }
 
-    public function reverse()
+    public function reverse(): static
     {
         return $this->replaceWhole(\strrev($this->raw));
     }
 
-    public function shuffle()
+    public function shuffle(): static
     {
         return $this->replaceWhole(\str_shuffle($this->raw));
     }
 
-    public function substr($start, $length = 'omitted')
+    public function substr(int $start, mixed $length = 'omitted'): static
     {
         if ($length === 'omitted') {
             return new static(\substr($this->raw, $start));
@@ -150,7 +147,7 @@ class AsciiString extends AnyString
         return new static(\substr($this->raw, $start, $length));
     }
 
-    public function translate($search, $replace = '')
+    public function translate(string $search, string $replace = ''): static
     {
         if (is_array($search)) {
             return $this->replaceWhole(\strtr($this->raw, $search));
@@ -158,43 +155,43 @@ class AsciiString extends AnyString
         return $this->replaceWhole(\strtr($this->raw, $search, $replace));
     }
 
-    public function trim($mask = " \t\n\r\0\x0B", $flags = self::BOTH_ENDS)
+    public function trim(string $mask = " \t\n\r\0\x0B", int $mode = self::BOTH_ENDS): static
     {
         // strip out bits we don't understand
-        $flags &= (self::END | self::BOTH_ENDS);
+        $mode &= (self::END | self::BOTH_ENDS);
 
-        $flagsmap = [
+        $modesmap = [
             self::START => 'ltrim',
             self::END => 'rtrim',
             self::BOTH_ENDS => 'trim',
         ];
-        return $this->replaceWhole(\call_user_func($flagsmap[$flags], $this->raw, $mask));
+        return $this->replaceWhole(\call_user_func($modesmap[$mode], $this->raw, $mask));
     }
 
-    public function unescape($flags = self::NORMAL)
+    public function unescape(int $mode = self::NORMAL): static
     {
         // strip out bits we don't understand
-        $flags &= (self::C_STYLE | self::META);
+        $mode &= (self::C_STYLE | self::META);
 
-        $flagsmap = [
+        $modesmap = [
             self::NORMAL => 'stripslashes',
             self::C_STYLE => 'stripcslashes',
             self::META => 'stripslashes',
         ];
-        return $this->replaceWhole(\call_user_func($flagsmap[$flags], $this->raw));
+        return $this->replaceWhole(\call_user_func($modesmap[$mode], $this->raw));
     }
 
     // TESTING METHODS
 
-    public function contains($needle, $offset = 0, $flags = self::NORMAL)
+    public function contains(string $needle, int $offset = 0, int $mode = self::NORMAL): bool
     {
-        if ($flags & self::EXACT_POSITION) {
-            return ($this->indexOf($needle, $offset, $flags) === $offset);
+        if ($mode & self::EXACT_POSITION) {
+            return ($this->indexOf($needle, $offset, $mode) === $offset);
         }
-        return ($this->indexOf($needle, $offset, $flags) !== false);
+        return ($this->indexOf($needle, $offset, $mode) !== false);
     }
 
-    public function countSubstr($needle, $offset = 0, $length = null)
+    public function countSubstr(string $needle, int $offset = 0, int $length = null): int
     {
         if ($length === null) {
             return \substr_count($this->raw, $needle, $offset);
@@ -202,17 +199,17 @@ class AsciiString extends AnyString
         return \substr_count($this->raw, $needle, $offset, $length);
     }
 
-    public function endsWith($str, $flags = self::NORMAL)
+    public function endsWith(string $str, int $mode = self::NORMAL): bool
     {
-        $flags &= self::CASE_INSENSITIVE;
+        $mode &= self::CASE_INSENSITIVE;
         $offset = $this->length() - \strlen($str);
-        return $this->contains($str, $offset, $flags | self::EXACT_POSITION | self::REVERSE);
+        return $this->contains($str, $offset, $mode | self::EXACT_POSITION | self::REVERSE);
     }
 
-    public function startsWith($str, $flags = self::NORMAL)
+    public function startsWith(string $str, int $mode = self::NORMAL): bool
     {
-        $flags &= self::CASE_INSENSITIVE;
-        return $this->contains($str, 0, $flags | self::EXACT_POSITION);
+        $mode &= self::CASE_INSENSITIVE;
+        return $this->contains($str, 0, $mode | self::EXACT_POSITION);
     }
 
     // INTERFACE IMPLEMENTATION METHODS
@@ -222,12 +219,12 @@ class AsciiString extends AnyString
         return \strlen($this->raw);
     }
 
-    public function current(): mixed
+    public function current(): string
     {
         return $this->raw[$this->caret];
     }
 
-    public function offsetGet($offset): mixed
+    public function offsetGet($offset): string
     {
         return $this->raw[$offset];
     }

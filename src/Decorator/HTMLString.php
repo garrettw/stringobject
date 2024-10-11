@@ -4,15 +4,9 @@ namespace StringObject\Decorator;
 
 class HTMLString extends TextString
 {
-    public function nl2br()
+    public function nl2br(bool $use_xhtml = true)
     {
-        $this->anystring = $this->anystring->replaceWhole(\nl2br($this->anystring->raw, false));
-        return $this;
-    }
-
-    public function nl2brX()
-    {
-        $this->anystring = $this->anystring->replaceWhole(\nl2br($this->anystring->raw, true));
+        $this->strobj = $this->strobj->replaceWhole(\nl2br($this->strobj->raw, $use_xhtml));
         return $this;
     }
 }

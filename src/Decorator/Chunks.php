@@ -2,25 +2,25 @@
 
 namespace StringObject\Decorator;
 
-use StringObject\AnyString;
+use StringObject\StringObject;
 
 class Chunks implements \ArrayAccess, \Countable, \Iterator
 {
-    private $anystring;
+    private $strobj;
     private $length;
     private $ending;
     private $index = 0;
 
-    public function __construct(AnyString $anystring, $length = 76, $ending = "\r\n")
+    public function __construct(StringObject $strobj, $length = 76, $ending = "\r\n")
     {
-        $this->anystring = $anystring;
+        $this->strobj = $strobj;
         $this->length = $length;
         $this->ending = $ending;
     }
 
     public function count(): int
     {
-        return \ceil($this->anystring->length() / ($this->length + 0.0));
+        return (int) \ceil($this->strobj->length() / ($this->length + 0.0));
     }
 
     public function current(): mixed
@@ -45,28 +45,28 @@ class Chunks implements \ArrayAccess, \Countable, \Iterator
 
     public function valid(): bool
     {
-        return ($this->index * $this->length < $this->anystring->length());
+        return ($this->index * $this->length < $this->strobj->length());
     }
 
     public function offsetExists($index): bool
     {
         $index = (int) $index;
-        return ($index >= 0 && $index * $this->length < $this->anystring->length());
+        return ($index >= 0 && $index * $this->length < $this->strobj->length());
     }
 
     public function offsetGet($index): mixed
     {
         $offset = $index * $this->length;
-        return $this->anystring->substr(
+        return $this->strobj->substr(
             $offset,
-            \min($offset + $this->length, $this->anystring->length() - $offset)
+            \min($offset + $this->length, $this->strobj->length() - $offset)
         )->append($this->ending);
     }
 
     public function offsetSet($offset, $value): void
     {
         throw new \LogicException('Cannot assign ' . $value
-            .' to immutable AnyString adapter instance at index ' . $offset);
+            . ' to immutable AnyString adapter instance at index ' . $offset);
     }
 
     public function offsetUnset($offset): void

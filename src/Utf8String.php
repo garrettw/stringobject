@@ -2,7 +2,7 @@
 
 namespace StringObject;
 
-class Utf8String extends AnyString
+class Utf8String extends AbstractString
 {
     const RAW = 0;
     const NFC = 1;
@@ -57,7 +57,7 @@ class Utf8String extends AnyString
         0x9F => 0x0178,
     ];
 
-    public function toArray($delim = '', $limit = null)
+    public function toArray(string $delim = '', int $limit = null): array
     {
         $this->parse();
 
@@ -82,10 +82,7 @@ class Utf8String extends AnyString
         return $this->chars[$index][0];
     }
 
-    /**
-     * @return int
-     */
-    public function charCodeAt($index)
+    public function charCodeAt(int $index): int
     {
         $this->parse();
         return $this->chars[$index][1];
@@ -96,7 +93,7 @@ class Utf8String extends AnyString
 
     }
 
-    public function length()
+    public function length(): int
     {
         $this->parse();
         return \count($this->chars);

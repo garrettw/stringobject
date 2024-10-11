@@ -2,7 +2,7 @@
 
 namespace StringObject\Decorator;
 
-use StringObject\AnyString;
+use StringObject\StringObject;
 
 class TextString
 {
@@ -122,63 +122,47 @@ class TextString
     ];
 
 
-    protected $anystring;
+    protected $strobj;
 
-    public function __construct(AnyString $anystring)
+    public function __construct(StringObject $strobj)
     {
-        $this->anystring = $anystring;
+        $this->strobj = $strobj;
     }
 
-    /**
-     * @return mixed
-     */
-    public function __call($name, $args)
+    public function __call($name, $args): mixed
     {
-        return $this->anystring->$name($args);
+        return $this->strobj->$name($args);
     }
 
-    /**
-     * @return string
-     */
-    public function __toString()
+    public function __toString(): string
     {
-        return $this->anystring->__toString();
+        return $this->strobj->__toString();
     }
 
-
-    public function toASCII()
+    public function toAscii()
     {
         $str = $this->__toString();
         foreach (self::$asciimap as $key => $value) {
             $str = \str_replace($value, $key, $str);
         }
-        return self::duplicate($this->anystring, $str);
+        return self::duplicate($this->strobj, $str);
     }
 
-    public function toPureASCII()
+    public function toPureAscii()
     {
-        $asciiobj = self::toASCII();
+        $asciiobj = self::toAscii();
         $str = \preg_replace('/[^\x20-\x7E]/u', '', $asciiobj->__toString());
-        return self::duplicate($this->anystring, $str);
+        return self::duplicate($this->strobj, $str);
     }
 
-    public function wordwrap($width = 75, $break = "\n")
+    public function wordwrap(int $width = 75, string $break = "\n", bool $cut_long_words = false)
     {
-        return self::duplicate($this->anystring, \wordwrap($this->__toString(), $width, $break, false));
+        return self::duplicate($this->strobj, \wordwrap($this->__toString(), $width, $break, $cut_long_words));
     }
 
-    public function wordwrapBreaking($width = 75, $break = "\n")
+    protected static function duplicate(StringObject $strobj, string $str)
     {
-        return self::duplicate($this->anystring, \wordwrap($this->__toString(), $width, $break, true));
-    }
-
-    /**
-     * @param string $str
-     */
-    protected static function duplicate(AnyString $anystring, $str)
-    {
-        $classname = \get_class($anystring);
+        $classname = \get_class($strobj);
         return new self(new $classname($str));
     }
-
 }
