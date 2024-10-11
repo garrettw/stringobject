@@ -13,12 +13,11 @@
 		}
 	],
 	"require": {
-		"php": ">=5.4.0"
+		"php": ">=8.1"
 	},
 	"require-dev": {
-		"phpdocumentor/phpdocumentor": "~2.8",
-		"phpspec/phpspec": "~2.1",
-        "fabpot/php-cs-fixer": "~1.8"
+		"phpspec/phpspec": "^7.5",
+        "friendsofphp/php-cs-fixer": "^3.64"
 	},
 	"autoload": {
 		"psr-4": {
