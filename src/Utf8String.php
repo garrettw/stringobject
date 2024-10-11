@@ -2,7 +2,7 @@
 
 namespace StringObject;
 
-class UString extends AnyString
+class Utf8String extends AnyString
 {
     const RAW = 0;
     const NFC = 1;

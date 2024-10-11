@@ -5,12 +5,12 @@ namespace spec\StringObject;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
-class UStringSpec extends ObjectBehavior
+class Utf8StringSpec extends ObjectBehavior
 {
     function it_is_initializable()
     {
         $this->beConstructedWith('string of text');
-        $this->shouldHaveType('StringObject\UString');
+        $this->shouldHaveType('StringObject\Utf8String');
     }
 
     function it_parses_one_char()

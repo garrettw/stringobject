@@ -2,11 +2,11 @@
 
 namespace StringObject;
 
-class UStringBuilder extends UString
+class Utf8StringBuilder extends Utf8String
 {
     public function replaceWhole($replacement = '')
     {
-        self::testStringableObject($replacement);
+        static::stringableOrFail($replacement);
         $this->raw = (string) $replacement;
         return $this;
     }

@@ -4,14 +4,14 @@ namespace spec\StringObject;
 
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use StringObject\AString;
+use StringObject\AsciiString;
 
-class AStringSpec extends ObjectBehavior
+class AsciiStringSpec extends ObjectBehavior
 {
     function it_is_initializable()
     {
         $this->beConstructedWith('string of text');
-        $this->shouldHaveType('StringObject\AString');
+        $this->shouldHaveType('StringObject\AsciiString');
     }
 
     function it_can_toarray()
@@ -51,20 +51,20 @@ class AStringSpec extends ObjectBehavior
     {
         $this->beConstructedWith('hello9');
         $this->compareTo('Hello9')->shouldNotBe(0);
-        $this->compareTo('Hello9', AString::CASE_INSENSITIVE)->shouldBe(0);
-        $this->compareTo('Hello9', AString::CURRENT_LOCALE)->shouldNotBe(0);
-        $this->compareTo('hello10', AString::NATURAL_ORDER)->shouldNotBe(0);
-        $this->compareTo('helLO9', AString::FIRST_N, 3)->shouldBe(0);
-        $this->compareTo('HELLO9', (AString::FIRST_N | AString::CASE_INSENSITIVE), 3)->shouldBe(0);
+        $this->compareTo('Hello9', AsciiString::CASE_INSENSITIVE)->shouldBe(0);
+        $this->compareTo('Hello9', AsciiString::CURRENT_LOCALE)->shouldNotBe(0);
+        $this->compareTo('hello10', AsciiString::NATURAL_ORDER)->shouldNotBe(0);
+        $this->compareTo('helLO9', AsciiString::FIRST_N, 3)->shouldBe(0);
+        $this->compareTo('HELLO9', (AsciiString::FIRST_N | AsciiString::CASE_INSENSITIVE), 3)->shouldBe(0);
     }
 
     function it_can_indexof()
     {
         $this->beConstructedWith('abcABC');
-        $this->indexOf('a', 0, AString::NORMAL)->shouldBe(0);
-        $this->indexOf('A', 0, AString::CASE_INSENSITIVE)->shouldBe(0);
-        $this->indexOf('a', 0, AString::REVERSE)->shouldBe(0);
-        $this->indexOf('a', 0, (AString::REVERSE | AString::CASE_INSENSITIVE))->shouldBe(3);
+        $this->indexOf('a', 0, AsciiString::NORMAL)->shouldBe(0);
+        $this->indexOf('A', 0, AsciiString::CASE_INSENSITIVE)->shouldBe(0);
+        $this->indexOf('a', 0, AsciiString::REVERSE)->shouldBe(0);
+        $this->indexOf('a', 0, (AsciiString::REVERSE | AsciiString::CASE_INSENSITIVE))->shouldBe(3);
     }
 
     function it_can_length()
@@ -100,13 +100,13 @@ class AStringSpec extends ObjectBehavior
     function it_can_escape_cstyle()
     {
         $this->beConstructedWith('foo[ ]');
-        $this->escape(AString::C_STYLE, 'A..z')->raw->shouldBe('\\f\\o\\o\\[ \\]');
+        $this->escape(AsciiString::C_STYLE, 'A..z')->raw->shouldBe('\\f\\o\\o\\[ \\]');
     }
 
     function it_can_escape_meta()
     {
         $this->beConstructedWith('Hello world. (can you hear me?)');
-        $this->escape(AString::META)->raw->shouldBe('Hello world\. \(can you hear me\?\)');
+        $this->escape(AsciiString::META)->raw->shouldBe('Hello world\. \(can you hear me\?\)');
     }
 
     function it_can_hexencode()
@@ -141,7 +141,7 @@ class AStringSpec extends ObjectBehavior
     function it_can_pad()
     {
         $this->beConstructedWith('Alien');
-        $this->pad(10, '-=', AString::START)->raw->shouldBe('-=-=-Alien');
+        $this->pad(10, '-=', AsciiString::START)->raw->shouldBe('-=-=-Alien');
     }
 
     function it_can_prepend()
@@ -153,7 +153,7 @@ class AStringSpec extends ObjectBehavior
     function it_can_remove()
     {
         $this->beConstructedWith('ABCDEFGH:/MNRPQR/');
-        $this->remove('mnrpqr', AString::CASE_INSENSITIVE)->raw->shouldBe('ABCDEFGH://');
+        $this->remove('mnrpqr', AsciiString::CASE_INSENSITIVE)->raw->shouldBe('ABCDEFGH://');
     }
 
     function it_can_removesubstr()
@@ -221,8 +221,8 @@ class AStringSpec extends ObjectBehavior
     {
         $this->beConstructedWith("\t\tThese are a few words :) ...  ");
         $this->trim()->raw->shouldBe('These are a few words :) ...');
-        $this->trim("\t ", AString::START)->raw->shouldBe('These are a few words :) ...  ');
-        $this->trim("\t ", AString::END)->raw->shouldBe("\t\tThese are a few words :) ...");
+        $this->trim("\t ", AsciiString::START)->raw->shouldBe('These are a few words :) ...  ');
+        $this->trim("\t ", AsciiString::END)->raw->shouldBe("\t\tThese are a few words :) ...");
     }
 
     function it_can_unescape()
@@ -234,13 +234,13 @@ class AStringSpec extends ObjectBehavior
     function it_can_unescape_cstyle()
     {
         $this->beConstructedWith('He\xallo');
-        $this->unescape(AString::C_STYLE)->raw->shouldBe("He\nllo");
+        $this->unescape(AsciiString::C_STYLE)->raw->shouldBe("He\nllo");
     }
 
     function it_can_unescape_meta()
     {
         $this->beConstructedWith('Hello world\. \(can you hear me\?\)');
-        $this->unescape(AString::META)->raw->shouldBe('Hello world. (can you hear me?)');
+        $this->unescape(AsciiString::META)->raw->shouldBe('Hello world. (can you hear me?)');
     }
 
     function it_can_uudecode()
@@ -259,14 +259,14 @@ class AStringSpec extends ObjectBehavior
     {
         $this->beConstructedWith('abc');
         $this->contains('a')->shouldBe(true);
-        $this->contains('A', 0, AString::CASE_INSENSITIVE)->shouldBe(true);
+        $this->contains('A', 0, AsciiString::CASE_INSENSITIVE)->shouldBe(true);
     }
 
     function it_can_contains_at()
     {
         $this->beConstructedWith('abc');
-        $this->contains('a', 0, AString::EXACT_POSITION)->shouldBe(true);
-        $this->contains('b', 0, AString::EXACT_POSITION)->shouldBe(false);
+        $this->contains('a', 0, AsciiString::EXACT_POSITION)->shouldBe(true);
+        $this->contains('b', 0, AsciiString::EXACT_POSITION)->shouldBe(false);
     }
 
     function it_can_countsubstr()
@@ -281,7 +281,7 @@ class AStringSpec extends ObjectBehavior
     {
         $this->beConstructedWith('abcdef abcxyz');
         $this->endsWith('xyz')->shouldBe(true);
-        $this->endsWith('XYZ', AString::CASE_INSENSITIVE)->shouldBe(true);
+        $this->endsWith('XYZ', AsciiString::CASE_INSENSITIVE)->shouldBe(true);
     }
 
     function it_can_equals()
@@ -312,6 +312,6 @@ class AStringSpec extends ObjectBehavior
     {
         $this->beConstructedWith('abcdef abcxyz');
         $this->startsWith('abc')->shouldBe(true);
-        $this->startsWith('AbC', AString::CASE_INSENSITIVE)->shouldBe(true);
+        $this->startsWith('AbC', AsciiString::CASE_INSENSITIVE)->shouldBe(true);
     }
 }

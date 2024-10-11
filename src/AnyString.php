@@ -32,7 +32,7 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
      */
     public function __construct($thing)
     {
-        self::testStringableObject($thing);
+        static::stringableOrFail($thing);
         $this->raw = (string) $thing;
     }
 
@@ -88,7 +88,7 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
 
     public function equals($str)
     {
-        self::testStringableObject($str);
+        static::stringableOrFail($str);
 
         $str = (string) $str;
         return ($str == $this->raw);
@@ -263,18 +263,16 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
         return $this->replaceWhole(\convert_uuencode($this->raw));
     }
 
-    protected static function testStringableObject($thing)
+    protected static function stringableOrFail($thing)
     {
-        if (is_string($thing)) {
+        if (
+            is_string($thing)
+            || (\is_object($thing) && \method_exists($thing, '__toString'))
+        ) {
             return true;
         }
 
-        if (\is_object($thing) && !\method_exists($thing, '__toString')) {
-            throw new \InvalidArgumentException(
-                'Parameter is an object that does not implement __toString() method'
-            );
-        } elseif (\is_array($thing)) {
-            throw new \InvalidArgumentException('Unsure of how to convert array to string');
-        }
+        // return false;
+        throw new \InvalidArgumentException('Parameter is not stringable');
     }
 }

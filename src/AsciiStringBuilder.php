@@ -2,11 +2,11 @@
 
 namespace StringObject;
 
-class AStringBuilder extends AString
+class AsciiStringBuilder extends AsciiString
 {
     public function replaceWhole($replacement = '')
     {
-        self::testStringableObject($replacement);
+        static::stringableOrFail($replacement);
         $this->raw = (string) $replacement;
         return $this;
     }

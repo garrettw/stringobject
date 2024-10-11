@@ -2,7 +2,7 @@
 
 namespace StringObject;
 
-class AString extends AnyString
+class AsciiString extends AnyString
 {
     public function toArray($delim = '', $limit = null)
     {
@@ -234,11 +234,11 @@ class AString extends AnyString
 
     public function offsetSet($offset, $value): void
     {
-        throw new \LogicException('Cannot assign ' . $value . ' to immutable AString instance at index ' . $offset);
+        throw new \LogicException('Cannot assign ' . $value . ' to immutable AsciiString instance at index ' . $offset);
     }
 
     public function offsetUnset($offset): void
     {
-        throw new \LogicException('Cannot unset index ' . $offset . ' on immutable AString instance');
+        throw new \LogicException('Cannot unset index ' . $offset . ' on immutable AsciiString instance');
     }
 }
