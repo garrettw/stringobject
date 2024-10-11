@@ -18,43 +18,43 @@ class Chunks implements \ArrayAccess, \Countable, \Iterator
         $this->ending = $ending;
     }
 
-    public function count()
+    public function count(): int
     {
         return \ceil($this->anystring->length() / ($this->length + 0.0));
     }
 
-    public function current()
+    public function current(): mixed
     {
         return $this->offsetGet($this->index);
     }
 
-    public function key()
+    public function key(): mixed
     {
         return $this->index;
     }
 
-    public function next()
+    public function next(): void
     {
         $this->index++;
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         $this->index = 0;
     }
 
-    public function valid()
+    public function valid(): bool
     {
         return ($this->index * $this->length < $this->anystring->length());
     }
 
-    public function offsetExists($index)
+    public function offsetExists($index): bool
     {
         $index = (int) $index;
         return ($index >= 0 && $index * $this->length < $this->anystring->length());
     }
 
-    public function offsetGet($index)
+    public function offsetGet($index): mixed
     {
         $offset = $index * $this->length;
         return $this->anystring->substr(
@@ -63,13 +63,13 @@ class Chunks implements \ArrayAccess, \Countable, \Iterator
         )->append($this->ending);
     }
 
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         throw new \LogicException('Cannot assign ' . $value
             .' to immutable AnyString adapter instance at index ' . $offset);
     }
 
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         throw new \LogicException('Cannot unset index ' . $offset . ' on immutable AnyString adapter instance');
     }

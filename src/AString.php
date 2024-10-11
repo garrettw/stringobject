@@ -22,15 +22,7 @@ class AString extends AnyString
 
     public function charAt($offset)
     {
-        return new static($this->raw{$offset});
-    }
-
-    /**
-     * @param integer $offset
-     */
-    public function charCodeAt($offset)
-    {
-        return \ord($this->raw{$offset});
+        return new static($this->raw[$offset]);
     }
 
     public function compareTo($str, $flags = self::NORMAL, $length = 1)
@@ -66,11 +58,6 @@ class AString extends AnyString
             (self::REVERSE | self::CASE_INSENSITIVE) => 'strripos',
         ];
         return \call_user_func($flagsmap[$flags], $this->raw, $needle, $offset);
-    }
-
-    public function length()
-    {
-        return \strlen($this->raw);
     }
 
     // MODIFYING METHODS
@@ -230,27 +217,27 @@ class AString extends AnyString
 
     // INTERFACE IMPLEMENTATION METHODS
 
-    public function count()
+    public function count(): int
     {
         return \strlen($this->raw);
     }
 
-    public function current()
+    public function current(): mixed
     {
         return $this->raw[$this->caret];
     }
 
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
-        return $this->raw{$offset};
+        return $this->raw[$offset];
     }
 
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         throw new \LogicException('Cannot assign ' . $value . ' to immutable AString instance at index ' . $offset);
     }
 
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         throw new \LogicException('Cannot unset index ' . $offset . ' on immutable AString instance');
     }

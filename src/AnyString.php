@@ -54,7 +54,7 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
 
     // ArrayAccess methods {
 
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         $offset = (int) $offset;
         return ($offset >= 0 && $offset < $this->count());
@@ -64,22 +64,22 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
 
     // Iterator methods {
 
-    public function key()
+    public function key(): mixed
     {
         return $this->caret;
     }
 
-    public function next()
+    public function next(): void
     {
         $this->caret++;
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         $this->caret = 0;
     }
 
-    public function valid()
+    public function valid(): bool
     {
         return ($this->caret < $this->count());
     }
@@ -92,6 +92,19 @@ abstract class AnyString implements \ArrayAccess, \Countable, \Iterator
 
         $str = (string) $str;
         return ($str == $this->raw);
+    }
+
+    public function length()
+    {
+        return \strlen($this->raw);
+    }
+
+    /**
+     * @param integer $offset
+     */
+    public function charCodeAt($offset)
+    {
+        return \ord($this->raw[$offset]);
     }
 
     /**

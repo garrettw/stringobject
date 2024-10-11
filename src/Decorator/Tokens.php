@@ -22,30 +22,30 @@ class Tokens implements \Iterator
         $this->delim = $delim;
     }
 
-    public function current()
+    public function current(): mixed
     {
         return $this->curval;
     }
 
-    public function key()
+    public function key(): mixed
     {
         return $this->index;
     }
 
-    public function next()
+    public function next(): void
     {
         $this->curval = $this->anystring->nextToken($this->delim);
         $this->index++;
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         $this->anystring->resetToken();
         $this->curval = $this->anystring->nextToken($this->delim);
         $this->index = 0;
     }
 
-    public function valid()
+    public function valid(): bool
     {
         return ($this->curval !== false);
     }

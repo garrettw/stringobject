@@ -191,7 +191,7 @@ class UString extends AnyString
         $invalid = false;
 
         for ($offset = 0; $offset < $len; $offset++) {
-            $char = $this->raw{$offset};
+            $char = $this->raw[$offset];
             $ord = \ord($char);
 
             if ($inside === false) {
