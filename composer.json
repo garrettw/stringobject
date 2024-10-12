@@ -17,11 +17,15 @@
 	},
 	"require-dev": {
 		"phpspec/phpspec": "^7.5",
-        "friendsofphp/php-cs-fixer": "^3.64"
+        "friendsofphp/php-cs-fixer": "^3.64",
+		"phpstan/phpstan": "^1.12"
 	},
 	"autoload": {
 		"psr-4": {
 			"StringObject\\": "src/"
 		}
+	},
+	"scripts": {
+		"phpstan": "vendor/bin/phpstan analyse src --level=5"
 	}
 }

@@ -13,7 +13,7 @@ abstract class AbstractString implements StringObject
     /**
      * @param mixed $thing Anything that can be cast to a string
      */
-    public function __construct($thing)
+    final public function __construct($thing)
     {
         static::stringableOrFail($thing);
         $this->raw = (string) $thing;

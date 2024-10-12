@@ -4,7 +4,7 @@ namespace StringObject;
 
 class AsciiString extends AbstractString
 {
-    public function toArray(string $delim = '', int $limit = null): array
+    public function toArray(mixed $delim = '', int $limit = null): array
     {
         if (empty($delim)) {
             return \str_split($this->raw);

@@ -20,7 +20,7 @@ interface StringObject extends \ArrayAccess, \Countable, \Iterator
     const LAZY = 1;
 
     public function __toString(): string;
-    public function toArray(string $delim = '', int $limit = null): array;
+    public function toArray(mixed $delim = '', int $limit = null): array;
     public function append(string $str): static;
     public function compareTo(string $str, int $mode = self::NORMAL, int $length = 1): mixed;
     public function escape(int $mode = self::NORMAL, string $charlist = ''): static;

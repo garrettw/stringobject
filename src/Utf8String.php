@@ -203,7 +203,7 @@ class Utf8String extends AbstractString
         'Ÿ' => "\x9F",
     ];
 
-    public function toArray(string $delim = '', int $limit = null): array
+    public function toArray(mixed $delim = '', int $limit = null): array
     {
         $this->parse();
 
@@ -372,6 +372,8 @@ class Utf8String extends AbstractString
         $len = \strlen($this->raw);
         $inside = false; // are we "inside" of evaluating a valid UTF-8 char?
         $invalid = false;
+        $originOffset = $bytes = $ordcache = 0;
+        $cache = '';
 
         for ($offset = 0; $offset < $len; $offset++) {
             $char = $this->raw[$offset];
@@ -424,7 +426,7 @@ class Utf8String extends AbstractString
 
                 // check for overlong, surrogate, too large, BOM, or C0/C1
                 $overlong = ($ordcache < self::$spec[$bytes]['start']);
-                $surrogate = ($ordcache & 0xFFFFF800 === 0xD800);
+                $surrogate = (($ordcache & 0xFFFFF800) === 0xD800);
                 $toobig = ($ordcache > 0x10FFFF);
 
                 if ($overlong || $surrogate || $toobig) {

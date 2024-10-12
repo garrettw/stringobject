@@ -8,7 +8,7 @@ class TextString
 {
     protected $strobj;
 
-    public function __construct(StringObject $strobj)
+    final public function __construct(StringObject $strobj)
     {
         $this->strobj = $strobj;
     }
