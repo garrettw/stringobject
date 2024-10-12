@@ -4,6 +4,7 @@ namespace spec\StringObject;
 
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
+use StringObject\Utf8String;
 
 class Utf8StringSpec extends ObjectBehavior
 {
@@ -11,6 +12,122 @@ class Utf8StringSpec extends ObjectBehavior
     {
         $this->beConstructedWith('string of text');
         $this->shouldHaveType('StringObject\Utf8String');
+    }
+
+    function it_can_toarray()
+    {
+        $this->beConstructedWith('11/2/333');
+
+        $result = $this->toArray()->getWrappedObject();
+        if ($result[0][0] != '1') {
+            throw new \Exception('Unexpected output ' . $result[0][0] . '; expected 1');
+        }
+
+        $result = $this->toArray('/')->getWrappedObject();
+        if ($result[0] != '11') {
+            throw new \Exception('Unexpected output ' . $result[0] . '; expected 11');
+        }
+        if (count(array_diff($result, [11,2,333])) != 0) {
+            throw new \Exception('expected 0, got something else');
+        }
+    }
+
+    function it_can_charat()
+    {
+        $this->beConstructedWith('abc');
+        $this->charAt(0)->shouldBe('a');
+        $this[0]->shouldBe('a');
+    }
+
+    function it_can_charcodeat()
+    {
+        $this->beConstructedWith("AÕ");
+        $this->charCodeAt(0)->shouldBe(65);
+        $this->charCodeAt(1)->shouldBe(213);
+        $this->length()->shouldBe(2);
+    }
+
+    function it_can_length()
+    {
+        $this->beConstructedWith('test');
+        $this->length()->shouldBe(4);
+    }
+
+    function it_can_append()
+    {
+        $this->beConstructedWith('one');
+        $this->append('two')->raw->shouldBe('onetwo');
+    }
+
+    function it_can_concat()
+    {
+        $this->beConstructedWith('one');
+        $this->concat('two')->raw->shouldBe('onetwo');
+    }
+
+    function it_can_escape()
+    {
+        $this->beConstructedWith("Is your name O'Reilly?");
+        $this->escape()->raw->shouldBe("Is your name O\\'Reilly?");
+    }
+
+    function it_can_escape_cstyle()
+    {
+        $this->beConstructedWith('foo[ ]');
+        $this->escape(Utf8String::C_STYLE, 'A..z')->raw->shouldBe('\\f\\o\\o\\[ \\]');
+    }
+
+    function it_can_escape_meta()
+    {
+        $this->beConstructedWith('Hello world. (can you hear me?)');
+        $this->escape(Utf8String::META)->raw->shouldBe('Hello world\. \(can you hear me\?\)');
+    }
+
+    function it_can_hexencode()
+    {
+        $this->beConstructedWith('Hello');
+        $this->hexEncode()->raw->shouldBe('48656c6c6f');
+    }
+
+    function it_can_hexdecode()
+    {
+        $this->beConstructedWith('48656c6c6f');
+        $this->hexDecode()->raw->shouldBe('Hello');
+    }
+
+    function it_can_tokenize()
+    {
+        $this->beConstructedWith("This is\tan example\nstring");
+        $this->resetToken();
+        $this->nextToken(" \n\t")->raw->shouldBe('This');
+        $this->nextToken(" \n\t")->raw->shouldBe('is');
+        $this->nextToken(" \n\t")->raw->shouldBe('an');
+        $this->resetToken();
+        $this->nextToken(" \n\t")->raw->shouldBe('This');
+    }
+
+    function it_can_prepend()
+    {
+        $this->beConstructedWith('one');
+        $this->prepend('two')->raw->shouldBe('twoone');
+    }
+
+    function it_can_remove()
+    {
+        $this->beConstructedWith('ABCDEFGH:/MNRPQR/');
+        $this->remove('mnrpqr', Utf8String::CASE_INSENSITIVE)->raw->shouldBe('ABCDEFGH://');
+    }
+
+    function it_can_repeat()
+    {
+        $this->beConstructedWith('-=');
+        $this->repeat(3)->raw->shouldBe('-=-=-=');
+    }
+
+    function it_can_replace()
+    {
+        $this->beConstructedWith('ABCDEFGH:/MNRPQR/');
+        $this->replace('MNRPQR', 'bob')->raw->shouldBe('ABCDEFGH:/bob/');
     }
 
     function it_parses_one_char()

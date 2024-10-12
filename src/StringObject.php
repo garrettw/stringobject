@@ -24,8 +24,10 @@ interface StringObject extends \ArrayAccess, \Countable, \Iterator
     public function append(string $str): static;
     public function compareTo(string $str, int $mode = self::NORMAL, int $length = 1): mixed;
     public function escape(int $mode = self::NORMAL, string $charlist = ''): static;
+    public function indexOf(string $needle, int $offset = 0, int $mode = self::NORMAL): mixed;
     public function length(): int;
     public function nextToken(string $delim): static;
+    public function pad(int $length, string $padString = ' ', $padType = self::END): static;
     public function prepend(string $str): static;
     public function remove(string $str, $mode = self::NORMAL): static;
     public function removeSubstr(int $start, int $length = null): static;

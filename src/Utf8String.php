@@ -233,6 +233,11 @@ class Utf8String extends AbstractString
         return $this->chars[$index][1];
     }
 
+    public function chunk(int $length = 76, string $ending = "\r\n"): static
+    {
+        throw new BadMethodCallException('chunk() not implemented yet');
+    }
+
     public function detectForm()
     {
     }
@@ -260,10 +265,33 @@ class Utf8String extends AbstractString
     {
         return $this->chars[$this->caret];
     }
+    
+    public function indexOf(string $needle, int $offset = 0, int $mode = self::NORMAL): mixed
+    {
+        if (!extension_loaded('mbstring')) {
+            throw new BadMethodCallException('mbstring extension is required to search a Unicode string');
+        }
+
+        // strip out bits we don't understand
+        $mode &= (self::REVERSE | self::CASE_INSENSITIVE);
+
+        $modesmap = [
+            self::NORMAL => 'mb_strpos',
+            self::CASE_INSENSITIVE => 'mb_stripos',
+            self::REVERSE => 'mb_strrpos',
+            (self::REVERSE | self::CASE_INSENSITIVE) => 'mb_strripos',
+        ];
+        return \call_user_func($modesmap[$mode], $this->raw, $needle, $offset);
+    }
 
     public function offsetGet($offset): string
     {
-        return $this->chars[$offset];
+        return $this->chars[$offset][0];
+    }
+    
+    public function pad(int $length, string $padString = ' ', $padType = self::END): static
+    {
+        throw new BadMethodCallException('pad() not implemented yet');
     }
 
     public function substr(int $start, int $length = null): static
@@ -301,6 +329,11 @@ class Utf8String extends AbstractString
 
         // strip out any characters outside the ASCII text range
         return new AsciiString(\preg_replace('/[^\x00-\x7F]/u', '', $str));
+    }
+
+    public function replaceSubstr(string $replacement, int $start, ?int $length = null): static
+    {
+        throw new BadMethodCallException('replaceSubstr() is not implemented yet');
     }
 
     protected static function cpToUtf8Char(int $cpt): string

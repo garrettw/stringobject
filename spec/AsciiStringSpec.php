@@ -25,7 +25,7 @@ class AsciiStringSpec extends ObjectBehavior
 
         $result = $this->toArray('/')->getWrappedObject();
         if ($result[0] != '11') {
-            throw new \Exception('Unexpected output ' . $result[0] . '; expected Hello');
+            throw new \Exception('Unexpected output ' . $result[0] . '; expected 11');
         }
         if (count(array_diff($result, [11,2,333])) != 0) {
             throw new \Exception('expected 0, got something else');

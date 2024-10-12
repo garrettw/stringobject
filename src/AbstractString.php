@@ -175,14 +175,6 @@ abstract class AbstractString implements StringObject
         return new static(\str_replace($search, $replace, $this->raw));
     }
 
-    public function replaceSubstr(string $replacement, int $start, int $length = null): static
-    {
-        if ($length === null) {
-            $length = $this->length();
-        }
-        return new static(\substr_replace($this->raw, $replacement, $start, $length));
-    }
-
     public function translate(mixed $search, string $replace = ''): static
     {
         if (is_array($search)) {
