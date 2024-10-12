@@ -2,6 +2,7 @@
 
 namespace StringObject\Decorator;
 
+use LogicException;
 use StringObject\StringObject;
 
 class Chunks implements \ArrayAccess, \Countable, \Iterator
@@ -65,12 +66,12 @@ class Chunks implements \ArrayAccess, \Countable, \Iterator
 
     public function offsetSet($offset, $value): void
     {
-        throw new \LogicException('Cannot assign ' . $value
+        throw new LogicException('Cannot assign ' . $value
             . ' to immutable Chunks instance at index ' . $offset);
     }
 
     public function offsetUnset($offset): void
     {
-        throw new \LogicException('Cannot unset index ' . $offset . ' on immutable Chunks instance');
+        throw new LogicException('Cannot unset index ' . $offset . ' on immutable Chunks instance');
     }
 }

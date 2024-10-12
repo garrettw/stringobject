@@ -72,9 +72,9 @@ class AsciiString extends AbstractString
         return $this->replaceSubstr($str, $offset, 0);
     }
 
-    public function pad(int $length, string $pad_string = ' ', $pad_type = self::END)
+    public function pad(int $length, string $padString = ' ', $padType = self::END)
     {
-        return new static(\str_pad($this->raw, $length, $pad_string, $pad_type));
+        return new static(\str_pad($this->raw, $length, $padString, $padType));
     }
 
     public function reverse(): static

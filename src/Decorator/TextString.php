@@ -23,9 +23,9 @@ class TextString
         return $this->strobj->__toString();
     }
 
-    public function wordwrap(int $width = 75, string $break = "\n", bool $cut_long_words = false)
+    public function wordwrap(int $width = 75, string $break = "\n", bool $cutLongWords = false)
     {
-        return $this->duplicate(\wordwrap($this->__toString(), $width, $break, $cut_long_words));
+        return $this->duplicate(\wordwrap($this->__toString(), $width, $break, $cutLongWords));
     }
 
     protected function duplicate(string $str)

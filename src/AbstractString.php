@@ -2,6 +2,9 @@
 
 namespace StringObject;
 
+use LogicException;
+use InvalidArgumentException;
+
 abstract class AbstractString implements StringObject
 {
     // PROPERTIES
@@ -39,12 +42,12 @@ abstract class AbstractString implements StringObject
 
     public function offsetSet($offset, $value): void
     {
-        throw new \LogicException('Cannot set ' . $value . ' on immutable StringObject at offset ' . $offset);
+        throw new LogicException('Cannot set ' . $value . ' on immutable StringObject at offset ' . $offset);
     }
 
     public function offsetUnset($offset): void
     {
-        throw new \LogicException('Cannot unset character at offset ' . $offset . ' on immutable StringObject');
+        throw new LogicException('Cannot unset character at offset ' . $offset . ' on immutable StringObject');
     }
 
     // END ArrayAccess methods }
@@ -253,6 +256,6 @@ abstract class AbstractString implements StringObject
         }
 
         // return false;
-        throw new \InvalidArgumentException('Parameter is not stringable');
+        throw new InvalidArgumentException('Parameter is not stringable');
     }
 }

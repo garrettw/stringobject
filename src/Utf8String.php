@@ -2,6 +2,8 @@
 
 namespace StringObject;
 
+use BadMethodCallException;
+
 class Utf8String extends AbstractString
 {
     const RAW = 0;
@@ -233,13 +235,12 @@ class Utf8String extends AbstractString
 
     public function detectForm()
     {
-
     }
 
     public function compareTo(string $str, int $mode = self::NORMAL, int $length = 1): mixed
     {
         if (!extension_loaded('intl')) {
-            throw new \BadMethodCallException('intl extension is required to compare Unicode strings');
+            throw new BadMethodCallException('intl extension is required to compare Unicode strings');
         }
 
         $coll = new \Collator('');
@@ -316,50 +317,38 @@ class Utf8String extends AbstractString
             return "\xEF\xBF\xBD"; // U+FFFD; invalid symbol
         }
 
-        if ($cpt < self::$spec[3]['start']) {
-            $data = [
+        $data = match (true) {
+            ($cpt < self::$spec[3]['start']) => [
                 0b11000000 | ($cpt >> 6),
                 0b10000000 | ($cpt & 0b00111111)
-            ];
-        } elseif ($cpt < self::$spec[4]['start']) {
-            $data = [
+            ],
+            ($cpt < self::$spec[4]['start']) => [
                 0b11100000 | ($cpt >> 12),
                 0b10000000 | (($cpt >> 6) & 0b00111111),
                 0b10000000 | ($cpt & 0b00111111),
-            ];
-        } else {
-            $data = [
+            ],
+            default => [
                 0b11110100,
                 0b10000000 | (($cpt >> 12) & 0b00111111),
                 0b10000000 | (($cpt >> 6) & 0b00111111),
                 0b10000000 | ($cpt & 0b00111111),
-            ];
-        }
+            ]
+        };
 
         return implode(array_map('chr', $data));
     }
     
     protected static function charLength(int $byte)
     {
-        if ($byte < 192) {
-            return 1;
-        }
-        if (($byte & 0b11100000) === 0b11000000) {
-            return 2;
-        }
-        if (($byte & 0b11110000) === 0b11100000) {
-            return 3;
-        }
-        if (($byte & 0b11111000) === 0b11110000) {
-            return 4;
-        }
-        if (($byte & 0b11111100) === 0b11111000) {
-            return 5;
-        }
-        if (($byte & 0b11111110) === 0b11111100) {
-            return 6;
-        }
-        return false;
+        return match (true) {
+            ($byte < 192) => 1,
+            (($byte & 0b11100000) === 0b11000000) => 2,
+            (($byte & 0b11110000) === 0b11100000) => 3,
+            (($byte & 0b11111000) === 0b11110000) => 4,
+            (($byte & 0b11111100) === 0b11111000) => 5,
+            (($byte & 0b11111110) === 0b11111100) => 6,
+            default => false
+        };
     }
 
     private function parse()

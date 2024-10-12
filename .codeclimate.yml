@@ -11,6 +11,10 @@ engines:
     checks:
       PSR1 Methods CamelCapsMethodName NotCamelCaps:
         enabled: false
+      Squiz WhiteSpace ScopeKeywordSpacing Incorrect:
+        enabled: false
+      PSR2 ControlStructures ControlStructureSpacing SpacingAfterOpenBrace:
+        enabled: false
 ratings:
   paths:
   - "**.php"
