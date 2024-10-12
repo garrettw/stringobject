@@ -25,7 +25,7 @@ class AsciiString extends AbstractString
         return new static($this->raw[$offset]);
     }
 
-    public function compareTo(string $str, int $mode = self::NORMAL, int $length = 1): int
+    public function compareTo(string $str, int $mode = self::NORMAL, int $length = 1): mixed
     {
         // strip out bits we don't understand
         $mode &= (self::CASE_INSENSITIVE | self::CURRENT_LOCALE | self::NATURAL_ORDER | self::FIRST_N);
@@ -64,23 +64,7 @@ class AsciiString extends AbstractString
 
     public function chunk(int $length = 76, string $ending = "\r\n"): static
     {
-        return $this->replaceWhole(\chunk_split($this->raw, $length, $ending));
-    }
-
-    public function escape(int $mode = self::NORMAL, string $charlist = ''): static
-    {
-        // strip out bits we don't understand
-        $mode &= (self::C_STYLE | self::META);
-
-        $modesmap = [
-            self::NORMAL => 'addslashes',
-            self::C_STYLE => 'addcslashes',
-            self::META => 'quotemeta',
-        ];
-        if ($mode === self::C_STYLE) {
-            return $this->replaceWhole(\call_user_func($modesmap[$mode], $this->raw, $charlist));
-        }
-        return $this->replaceWhole(\call_user_func($modesmap[$mode], $this->raw));
+        return new static(\chunk_split($this->raw, $length, $ending));
     }
 
     public function insertAt(string $str, int $offset): static
@@ -90,95 +74,22 @@ class AsciiString extends AbstractString
 
     public function pad(int $length, string $pad_string = ' ', $pad_type = self::END)
     {
-        return $this->replaceWhole(\str_pad($this->raw, $length, $pad_string, $pad_type));
-    }
-
-    public function prepend(string $str): static
-    {
-        return $this->replaceWhole($str . $this->raw);
-    }
-
-    public function remove(string $str, $mode = self::NORMAL): static
-    {
-        return $this->replace($str, '', $mode);
-    }
-
-    public function removeSubstr(int $start, int $length = null): static
-    {
-        return $this->replaceSubstr('', $start, $length);
-    }
-
-    public function repeat(int $times): static
-    {
-        return $this->replaceWhole(\str_repeat($this->raw, $times));
-    }
-
-    public function replace(string $search, string $replace, int $mode = self::NORMAL): static
-    {
-        if ($mode & self::CASE_INSENSITIVE) {
-            return $this->replaceWhole(\str_ireplace($search, $replace, $this->raw));
-        }
-        return $this->replaceWhole(\str_replace($search, $replace, $this->raw));
-    }
-
-    public function replaceSubstr(string $replacement, int $start, int $length = null): static
-    {
-        if ($length === null) {
-            $length = $this->length();
-        }
-        return $this->replaceWhole(\substr_replace($this->raw, $replacement, $start, $length));
+        return new static(\str_pad($this->raw, $length, $pad_string, $pad_type));
     }
 
     public function reverse(): static
     {
-        return $this->replaceWhole(\strrev($this->raw));
+        return new static(\strrev($this->raw));
     }
 
     public function shuffle(): static
     {
-        return $this->replaceWhole(\str_shuffle($this->raw));
+        return new static(\str_shuffle($this->raw));
     }
 
-    public function substr(int $start, mixed $length = 'omitted'): static
+    public function substr(int $start, int $length = null): static
     {
-        if ($length === 'omitted') {
-            return new static(\substr($this->raw, $start));
-        }
         return new static(\substr($this->raw, $start, $length));
-    }
-
-    public function translate(string $search, string $replace = ''): static
-    {
-        if (is_array($search)) {
-            return $this->replaceWhole(\strtr($this->raw, $search));
-        }
-        return $this->replaceWhole(\strtr($this->raw, $search, $replace));
-    }
-
-    public function trim(string $mask = " \t\n\r\0\x0B", int $mode = self::BOTH_ENDS): static
-    {
-        // strip out bits we don't understand
-        $mode &= (self::END | self::BOTH_ENDS);
-
-        $modesmap = [
-            self::START => 'ltrim',
-            self::END => 'rtrim',
-            self::BOTH_ENDS => 'trim',
-        ];
-        return $this->replaceWhole(\call_user_func($modesmap[$mode], $this->raw, $mask));
-    }
-
-    public function unescape(int $mode = self::NORMAL): static
-    {
-        // strip out bits we don't understand
-        $mode &= (self::C_STYLE | self::META);
-
-        $modesmap = [
-            self::NORMAL => 'stripslashes',
-            self::C_STYLE => 'stripcslashes',
-            self::META => 'stripslashes',
-        ];
-        return $this->replaceWhole(\call_user_func($modesmap[$mode], $this->raw));
     }
 
     // TESTING METHODS
@@ -227,15 +138,5 @@ class AsciiString extends AbstractString
     public function offsetGet($offset): string
     {
         return $this->raw[$offset];
-    }
-
-    public function offsetSet($offset, $value): void
-    {
-        throw new \LogicException('Cannot assign ' . $value . ' to immutable AsciiString instance at index ' . $offset);
-    }
-
-    public function offsetUnset($offset): void
-    {
-        throw new \LogicException('Cannot unset index ' . $offset . ' on immutable AsciiString instance');
     }
 }

@@ -2,7 +2,7 @@
 
 namespace StringObject;
 
-interface StringObject
+interface StringObject extends \ArrayAccess, \Countable, \Iterator
 {
     const START = 0;
     const END = 1;
@@ -22,17 +22,18 @@ interface StringObject
     public function __toString(): string;
     public function toArray(string $delim = '', int $limit = null): array;
     public function append(string $str): static;
-    public function compareTo(string $str, int $mode = self::NORMAL, int $length = 1): int;
+    public function compareTo(string $str, int $mode = self::NORMAL, int $length = 1): mixed;
     public function escape(int $mode = self::NORMAL, string $charlist = ''): static;
     public function length(): int;
+    public function nextToken(string $delim): static;
     public function prepend(string $str): static;
     public function remove(string $str, $mode = self::NORMAL): static;
     public function removeSubstr(int $start, int $length = null): static;
     public function repeat(int $times): static;
     public function replace(string $search, string $replace, int $mode = self::NORMAL): static;
     public function replaceSubstr(string $replacement, int $start, int $length = null): static;
-    public function replaceWhole(string $replacement = ''): static;
-    public function substr(int $start, mixed $length = 'omitted'): static;
+    public function resetToken(): void;
+    public function substr(int $start, int $length = null): static;
     public function translate(string $search, string $replace = ''): static;
     public function trim(string $mask = " \t\n\r\0\x0B", int $mode = self::BOTH_ENDS): static;
     public function unescape(int $mode = self::NORMAL): static;
