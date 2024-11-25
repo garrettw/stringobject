@@ -4,13 +4,17 @@ namespace StringObject;
 
 class AsciiString extends AbstractString
 {
-    public function toArray(mixed $delim = '', int $limit = null): array
+    /**
+     * @param int|string $delim
+     * @return string[]
+     */
+    public function toArray($delim = '', int $limit = null): array
     {
         if (empty($delim)) {
             return \str_split($this->raw);
         }
         if (is_int($delim)) {
-            return \str_split($this->raw, $delim);
+            return \str_split($this->raw, abs($delim));
         }
         if ($limit === null) {
             return \explode($delim, $this->raw);
@@ -62,6 +66,9 @@ class AsciiString extends AbstractString
 
     // MODIFYING METHODS
 
+    /**
+     * @param int<1, max> $length
+     */
     public function chunk(int $length = 76, string $ending = "\r\n"): static
     {
         return new static(\chunk_split($this->raw, $length, $ending));
@@ -80,7 +87,7 @@ class AsciiString extends AbstractString
         return new static(\substr_replace($this->raw, $replacement, $start, $length));
     }
 
-    public function pad(int $length, string $padString = ' ', $padType = self::END): static
+    public function pad(int $length, string $padString = ' ', int $padType = self::END): static
     {
         return new static(\str_pad($this->raw, $length, $padString, $padType));
     }

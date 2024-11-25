@@ -2,6 +2,10 @@
 
 namespace StringObject;
 
+/**
+ * @extends \ArrayAccess<int, string>
+ * @extends \Iterator<int, string>
+ */
 interface StringObject extends \ArrayAccess, \Countable, \Iterator
 {
     const START = 0;
@@ -20,16 +24,21 @@ interface StringObject extends \ArrayAccess, \Countable, \Iterator
     const LAZY = 1;
 
     public function __toString(): string;
+
+    /**
+     * @return string[]
+     */
     public function toArray(mixed $delim = '', int $limit = null): array;
+
     public function append(string $str): static;
     public function compareTo(string $str, int $mode = self::NORMAL, int $length = 1): mixed;
     public function escape(int $mode = self::NORMAL, string $charlist = ''): static;
     public function indexOf(string $needle, int $offset = 0, int $mode = self::NORMAL): mixed;
     public function length(): int;
     public function nextToken(string $delim): static;
-    public function pad(int $length, string $padString = ' ', $padType = self::END): static;
+    public function pad(int $length, string $padString = ' ', int $padType = self::END): static;
     public function prepend(string $str): static;
-    public function remove(string $str, $mode = self::NORMAL): static;
+    public function remove(string $str, int $mode = self::NORMAL): static;
     public function removeSubstr(int $start, int $length = null): static;
     public function repeat(int $times): static;
     public function replace(string $search, string $replace, int $mode = self::NORMAL): static;

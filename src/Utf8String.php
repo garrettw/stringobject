@@ -13,11 +13,13 @@ class Utf8String extends AbstractString
     const NFKC = 5;
     const NFKD = 6;
 
-    protected $chars = [];
-    protected $uhandler;
-    protected $normform = self::RAW;
+    /** @var array<int, array<int, string|int>> */
+    protected array $chars = [];
+    protected mixed $uhandler;
+    protected int $normform = self::RAW;
 
-    protected static $spec = [
+    /** @var array<int, array<string, int>> */
+    protected static array $spec = [
         2 => ['mask' => 0b00011111, 'start' => 0x80],
         3 => ['mask' => 0b00001111, 'start' => 0x800],
         4 => ['mask' => 0b00000111, 'start' => 0x10000],
@@ -25,7 +27,8 @@ class Utf8String extends AbstractString
         6 => ['mask' => 0b00000001, 'start' => 0x4000000],
     ];
 
-    protected static $asciimap = [
+    /** @var array<string, string[]> */
+    protected static array $asciimap = [
         'a' => ['à', 'á', 'ả', 'ã', 'ạ', 'ă', 'ắ', 'ằ', 'ẳ', 'ẵ', 'ặ', 'â', 'ấ',
                 'ầ', 'ẩ', 'ẫ', 'ậ', 'ā', 'ą', 'å', 'α', 'ά', 'ἀ', 'ἁ', 'ἂ', 'ἃ',
                 'ἄ', 'ἅ', 'ἆ', 'ἇ', 'ᾀ', 'ᾁ', 'ᾂ', 'ᾃ', 'ᾄ', 'ᾅ', 'ᾆ', 'ᾇ', 'ὰ',
@@ -140,7 +143,8 @@ class Utf8String extends AbstractString
                 "\xE2\x80\xAF", "\xE2\x81\x9F", "\xE3\x80\x80"],
     ];
 
-    protected static $winc1umap = [
+    /** @var array<int, int> */
+    protected static array $winc1umap = [
         0x80 => 0x20AC,
         0x81 => 0xFFFD, // invalid
         0x82 => 0x201A,
@@ -175,7 +179,8 @@ class Utf8String extends AbstractString
         0x9F => 0x0178,
     ];
 
-    protected static $utf8ToC1u = [
+    /** @var array<string, string> */
+    protected static array $utf8ToC1u = [
         '€' => "\x80",
         '‚' => "\x82",
         'ƒ' => "\x83",
@@ -205,15 +210,19 @@ class Utf8String extends AbstractString
         'Ÿ' => "\x9F",
     ];
 
-    public function toArray(mixed $delim = '', int $limit = null): array
+    /**
+     * @param int|string $delim
+     * @return array<int, mixed>
+     */
+    public function toArray($delim = '', int $limit = null): array
     {
         $this->parse();
 
         if (empty($delim)) {
-            return $this->chars;
+            return array_column($this->chars, 0);
         }
         if (is_int($delim)) {
-            return \str_split($this->raw, $delim);
+            return \str_split($this->raw, abs($delim));
         }
         if ($limit === null) {
             return \explode($delim, $this->raw);
@@ -224,13 +233,13 @@ class Utf8String extends AbstractString
     public function charAt(int $index): string
     {
         $this->parse();
-        return $this->chars[$index][0];
+        return (string) $this->chars[$index][0];
     }
 
     public function charCodeAt(int $index): int
     {
         $this->parse();
-        return $this->chars[$index][1];
+        return (int) $this->chars[$index][1];
     }
 
     public function chunk(int $length = 76, string $ending = "\r\n"): static
@@ -238,7 +247,7 @@ class Utf8String extends AbstractString
         throw new BadMethodCallException('chunk() not implemented yet');
     }
 
-    public function detectForm()
+    public function detectForm(): void
     {
     }
 
@@ -261,9 +270,12 @@ class Utf8String extends AbstractString
         return \count($this->chars);
     }
 
+    /**
+     * @return string
+     */
     public function current(): string
     {
-        return $this->chars[$this->caret];
+        return (string) $this->chars[$this->caret][0];
     }
     
     public function indexOf(string $needle, int $offset = 0, int $mode = self::NORMAL): mixed
@@ -286,20 +298,20 @@ class Utf8String extends AbstractString
 
     public function offsetGet($offset): string
     {
-        return $this->chars[$offset][0];
+        return (string) $this->chars[$offset][0];
     }
     
-    public function pad(int $length, string $padString = ' ', $padType = self::END): static
+    public function pad(int $length, string $padString = ' ', int $padType = self::END): static
     {
         throw new BadMethodCallException('pad() not implemented yet');
     }
 
     public function substr(int $start, int $length = null): static
     {
-        return new static(\implode('', \array_slice($this->chars, $start, $length)));
+        return new static(\implode('', \array_slice(array_column($this->chars, 0), $start, $length)));
     }
 
-    public function normalize(Normalize\Normalizer $norm)
+    public function normalize(Normalize\Normalizer $norm): static
     {
         $this->parse();
         $result = $norm->normalize($this);
@@ -312,7 +324,7 @@ class Utf8String extends AbstractString
         return new static($result);
     }
 
-    public function toAscii(bool $allow1252 = false)
+    public function toAscii(bool $allow1252 = false): AsciiString
     {
         $str = $this->__toString();
         // convert foreign text chars to ASCII equivalents
@@ -324,11 +336,11 @@ class Utf8String extends AbstractString
             $str = \str_replace(array_keys(self::$utf8ToC1u), array_values(self::$utf8ToC1u), $str);
             
             // strip out anything left over
-            return new AsciiString(\preg_replace('/[^\x00-\x9F]/u', '', $str));
+            return new AsciiString(\preg_replace('/[^\x00-\x9F]/u', '', $str) ?: '');
         }
 
         // strip out any characters outside the ASCII text range
-        return new AsciiString(\preg_replace('/[^\x00-\x7F]/u', '', $str));
+        return new AsciiString(\preg_replace('/[^\x00-\x7F]/u', '', $str) ?: '');
     }
 
     public function replaceSubstr(string $replacement, int $start, ?int $length = null): static
@@ -371,7 +383,10 @@ class Utf8String extends AbstractString
         return implode(array_map('chr', $data));
     }
     
-    protected static function charLength(int $byte)
+    /**
+     * @return int|false
+     */
+    protected static function charLength(int $byte): mixed
     {
         return match (true) {
             ($byte < 192) => 1,
@@ -384,7 +399,7 @@ class Utf8String extends AbstractString
         };
     }
 
-    private function parse()
+    private function parse(): void
     {
         if (!empty($this->chars)) {
             // it's already been parsed

@@ -13,6 +13,5 @@ The goal of this library is to provide an object interface to interact with stri
 
   - Write tests for Utf8String
   - Work on normalization code
-  - Migrate Travis config to GitHub Action
   - Consider using a different testing framework because nobody uses PhpSpec... PHPUnit, Codeception, or Pest
   - Flesh out devcontainer config with extensions

@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/php
 {
-	"name": "PHP",
+	"name": "PHP 8.2",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/php:1-8.2-bullseye",
 
@@ -10,21 +10,31 @@
 	// Configure properties specific to VS Code.
 		"vscode": {
 			"extensions": [
-				"ikappas.composer"
+				"ikappas.composer",
+                "neilbrayfield.php-docblocker",
+                "mehedidracula.php-namespace-resolver",
+                "github.vscode-github-actions",
+                "-xdebug.php-debug",
+                "nhoizey.gremlins",
+                "oderwat.indent-rainbow",
+                "bmewburn.vscode-intelephense-client",
+                "pflannery.vscode-versionlens",
+                "sonarsource.sonarlint-vscode",
+                "editorconfig.editorconfig",
+                "predrag-nikolic.php-class-helper",
+                "redhat.vscode-yaml"
 			]
 		}
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [
-		8080
-	],
+	// "forwardPorts": [],
 	"features": {
 		"ghcr.io/devcontainers/features/github-cli:1": {}
 	},
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "sudo chmod a+x \"$(pwd)\" && sudo rm -rf /var/www/html && sudo ln -s \"$(pwd)\" /var/www/html; if [ -f composer.json ];then composer install;fi"
+	"postCreateCommand": "if [ -f composer.json ];then composer install;fi"
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"

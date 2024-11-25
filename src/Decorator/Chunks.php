@@ -5,14 +5,18 @@ namespace StringObject\Decorator;
 use LogicException;
 use StringObject\StringObject;
 
+/**
+ * @implements \ArrayAccess<int, StringObject>
+ * @implements \Iterator<int, StringObject>
+ */
 class Chunks implements \ArrayAccess, \Countable, \Iterator
 {
-    private $strobj;
-    private $length;
-    private $ending;
-    private $index = 0;
+    private StringObject $strobj;
+    private int $length;
+    private string $ending;
+    private int $index = 0;
 
-    public function __construct(StringObject $strobj, $length = 76, $ending = "\r\n")
+    public function __construct(StringObject $strobj, int $length = 76, string $ending = "\r\n")
     {
         $this->strobj = $strobj;
         $this->length = $length;
@@ -24,7 +28,7 @@ class Chunks implements \ArrayAccess, \Countable, \Iterator
         return (int) \ceil($this->strobj->length() / ($this->length + 0.0));
     }
 
-    public function current(): mixed
+    public function current(): StringObject
     {
         return $this->offsetGet($this->index);
     }
@@ -55,7 +59,7 @@ class Chunks implements \ArrayAccess, \Countable, \Iterator
         return ($index >= 0 && $index * $this->length < $this->strobj->length());
     }
 
-    public function offsetGet($index): mixed
+    public function offsetGet($index): StringObject
     {
         $offset = $index * $this->length;
         return $this->strobj->substr(

@@ -9,17 +9,16 @@ abstract class AbstractString implements StringObject
 {
     // PROPERTIES
 
-    protected $raw;
-    protected $caret = 0;
-    protected $token = false;
+    protected string $raw;
+    protected int $caret = 0;
+    protected bool $token = false;
 
     /**
-     * @param mixed $thing Anything that can be cast to a string
+     * @param string|object $thing Anything that can be cast to a string
      */
     final public function __construct($thing)
     {
-        static::stringableOrFail($thing);
-        $this->raw = (string) $thing;
+        $this->raw = static::stringify($thing);
     }
 
     public function __get(string $name): mixed
@@ -76,12 +75,12 @@ abstract class AbstractString implements StringObject
 
     // END Iterator methods }
 
+    /**
+     * @param string|object $str
+     */
     public function equals($str): bool
     {
-        static::stringableOrFail($str);
-
-        $str = (string) $str;
-        return ($str == $this->raw);
+        return (static::stringify($str) == $this->raw);
     }
 
     public function length(): int
@@ -111,12 +110,12 @@ abstract class AbstractString implements StringObject
         return empty($this->raw);
     }
 
-    public function append($str): static
+    public function append(string $str): static
     {
         return new static($this->raw . $str);
     }
 
-    public function concat($str): static
+    public function concat(string $str): static
     {
         return $this->append($str);
     }
@@ -139,7 +138,7 @@ abstract class AbstractString implements StringObject
 
     public function hexDecode(): static
     {
-        return new static(\hex2bin($this->raw));
+        return new static(\hex2bin($this->raw) ?: '');
     }
 
     public function hexEncode(): static
@@ -152,7 +151,7 @@ abstract class AbstractString implements StringObject
         return new static($str . $this->raw);
     }
 
-    public function remove(string $str, $mode = self::NORMAL): static
+    public function remove(string $str, int $mode = self::NORMAL): static
     {
         return $this->replace($str, '', $mode);
     }
@@ -175,6 +174,9 @@ abstract class AbstractString implements StringObject
         return new static(\str_replace($search, $replace, $this->raw));
     }
 
+    /**
+     * @param string|string[] $search
+     */
     public function translate(mixed $search, string $replace = ''): static
     {
         if (is_array($search)) {
@@ -212,10 +214,10 @@ abstract class AbstractString implements StringObject
     public function nextToken(string $delim): static
     {
         if ($this->token) {
-            return new static(\strtok($delim));
+            return new static(\strtok($delim) ?: '');
         }
         $this->token = true;
-        return new static(\strtok($this->raw, $delim));
+        return new static(\strtok($this->raw, $delim) ?: '');
     }
 
     public function resetToken(): void
@@ -230,7 +232,7 @@ abstract class AbstractString implements StringObject
 
     public function uuDecode(): static
     {
-        return new static(\convert_uudecode($this->raw));
+        return new static(\convert_uudecode($this->raw) ?: '');
     }
 
     public function uuEncode(): static
@@ -238,13 +240,17 @@ abstract class AbstractString implements StringObject
         return new static(\convert_uuencode($this->raw));
     }
 
-    protected static function stringableOrFail($thing): bool
+    /**
+     * @param string|object $thing
+     * @throws InvalidArgumentException
+     */
+    protected static function stringify(mixed $thing): string
     {
-        if (
-            is_string($thing)
-            || (\is_object($thing) && \method_exists($thing, '__toString'))
-        ) {
-            return true;
+        if (\is_object($thing) && \method_exists($thing, '__toString')) {
+            return $thing->__toString();
+        }
+        if (\is_string($thing)) {
+            return $thing;
         }
 
         // return false;

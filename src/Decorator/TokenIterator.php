@@ -4,12 +4,15 @@ namespace StringObject\Decorator;
 
 use StringObject\StringObject;
 
+/**
+ * @implements \Iterator<int, string>
+ */
 class TokenIterator implements \Iterator
 {
-    private $strobj;
-    private $delim;
-    private $index = 0;
-    private $curval;
+    private StringObject $strobj;
+    private string $delim;
+    private int $index = 0;
+    private string $curval;
 
     public function __construct(StringObject $strobj, string $delim)
     {
@@ -17,7 +20,7 @@ class TokenIterator implements \Iterator
         $this->delim = $delim;
     }
 
-    public function changeToken(string $delim)
+    public function changeToken(string $delim): void
     {
         $this->delim = $delim;
     }

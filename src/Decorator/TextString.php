@@ -6,16 +6,20 @@ use StringObject\StringObject;
 
 class TextString
 {
-    protected $strobj;
+    protected StringObject $strobj;
 
     final public function __construct(StringObject $strobj)
     {
         $this->strobj = $strobj;
     }
 
-    public function __call($name, $args): mixed
+    /**
+     * @param string $name
+     * @param mixed[] $args
+     */
+    public function __call(string $name, array $args): mixed
     {
-        return $this->strobj->$name($args);
+        return $this->strobj->$name(...$args);
     }
 
     public function __toString(): string
@@ -23,12 +27,12 @@ class TextString
         return $this->strobj->__toString();
     }
 
-    public function wordwrap(int $width = 75, string $break = "\n", bool $cutLongWords = false)
+    public function wordwrap(int $width = 75, string $break = "\n", bool $cutLongWords = false): static
     {
         return $this->duplicate(\wordwrap($this->__toString(), $width, $break, $cutLongWords));
     }
 
-    protected function duplicate(string $str)
+    protected function duplicate(string $str): static
     {
         $classname = \get_class($this->strobj);
         return new static(new $classname($str));
