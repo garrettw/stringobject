@@ -242,15 +242,24 @@ class Utf8String extends AbstractString
         return (int) $this->chars[$index][1];
     }
 
+    /**
+     * Use mbstring ideally but implement a PHP fallback
+     */
     public function chunk(int $length = 76, string $ending = "\r\n"): static
     {
         throw new BadMethodCallException('chunk() not implemented yet');
     }
 
+    /**
+     * intl or bust.
+     */
     public function detectForm(): void
     {
     }
 
+    /**
+     * intl. PHP fallback could compare codepoints but it's not the same.
+     */
     public function compareTo(string $str, int $mode = self::NORMAL, int $length = 1): mixed
     {
         if (!extension_loaded('intl')) {
@@ -275,9 +284,13 @@ class Utf8String extends AbstractString
      */
     public function current(): string
     {
+        $this->parse();
         return (string) $this->chars[$this->caret][0];
     }
     
+    /**
+     * Use mbstring ideally but implement a PHP fallback
+     */
     public function indexOf(string $needle, int $offset = 0, int $mode = self::NORMAL): mixed
     {
         if (!extension_loaded('mbstring')) {
@@ -298,9 +311,13 @@ class Utf8String extends AbstractString
 
     public function offsetGet($offset): string
     {
+        $this->parse();
         return (string) $this->chars[$offset][0];
     }
     
+    /**
+     * Use mbstring ideally but implement a PHP fallback
+     */
     public function pad(int $length, string $padString = ' ', int $padType = self::END): static
     {
         throw new BadMethodCallException('pad() not implemented yet');
@@ -308,9 +325,13 @@ class Utf8String extends AbstractString
 
     public function substr(int $start, int $length = null): static
     {
+        $this->parse();
         return new static(\implode('', \array_slice(array_column($this->chars, 0), $start, $length)));
     }
 
+    /**
+     * intl or bust. Unless I figure out a way to do it.
+     */
     public function normalize(Normalize\Normalizer $norm): static
     {
         $this->parse();
@@ -327,6 +348,14 @@ class Utf8String extends AbstractString
     public function toAscii(bool $allow1252 = false): AsciiString
     {
         $str = $this->__toString();
+
+        if (\extension_loaded('intl') && \function_exists('transliterator_transliterate')) {
+            $transliterated = \transliterator_transliterate('Any-Latin; Latin-ASCII; [^\\p{ASCII}] Remove', $str);
+            if ($transliterated !== false) {
+                return new AsciiString($transliterated);
+            }
+        }
+
         // convert foreign text chars to ASCII equivalents
         foreach (static::$asciimap as $key => $value) {
             $str = \str_replace($value, $key, $str);
@@ -343,6 +372,9 @@ class Utf8String extends AbstractString
         return new AsciiString(\preg_replace('/[^\x00-\x7F]/u', '', $str) ?: '');
     }
 
+    /**
+     * Use mbstring ideally but implement a PHP fallback
+     */
     public function replaceSubstr(string $replacement, int $start, ?int $length = null): static
     {
         throw new BadMethodCallException('replaceSubstr() is not implemented yet');

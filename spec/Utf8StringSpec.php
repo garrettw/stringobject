@@ -59,6 +59,13 @@ class Utf8StringSpec extends ObjectBehavior
         $this->append('two')->raw->shouldBe('onetwo');
     }
 
+    function it_can_convert_to_ascii()
+    {
+        $this->beConstructedWith('Café');
+
+        $this->toAscii()->raw->shouldBe('Cafe');
+    }
+
     function it_can_concat()
     {
         $this->beConstructedWith('one');
