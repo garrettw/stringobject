@@ -139,6 +139,15 @@ class Parser
         return $chars;
     }
 
+    public static function cp1252ToUtf8(string $raw): string
+    {
+        return str_replace(
+            array_map('chr', array_keys(self::$winc1umap)),
+            array_map('self::cpToUtf8Char', array_values(self::$winc1umap)),
+            $raw,
+        );
+    }
+
     /**
      * @return int|false
      */
